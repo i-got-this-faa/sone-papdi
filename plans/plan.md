@@ -11,7 +11,7 @@ Build **sone-papdi**: a complete Wayland desktop shell (panel, launcher, notific
 
 | ID | Subplan | Purpose | Depends on | Status |
 |---|---|---|---|---|
-| 00 | [Scaffold](./subplan-00-scaffold.md) | Workspace, crate skeletons, CI, root manifests | — | 🚧 Not started |
+| 00 | [Scaffold](./subplan-00-scaffold.md) | Workspace, crate skeletons, CI, root manifests | — | ✅ Done |
 | 01 | [Core IPC & Event Bus](./subplan-01-core.md) | `ShellEvent` types, `EventBus`, length-prefixed JSON IPC, socket paths | 00 | 🚧 Not started |
 | 02 | [Configuration Engine](./subplan-02-config.md) | TOML schema, default config, hot-reload watcher | 00 | 🚧 Not started |
 | 03 | [Clipboard Engine](./subplan-03-clipboard.md) | Clipboard daemon, SQLite history, `ShellEvent::Clipboard` | 01, 02 | 🚧 Not started |
@@ -92,7 +92,7 @@ Build **sone-papdi**: a complete Wayland desktop shell (panel, launcher, notific
 
 Update this line as subplans complete:
 
-**Completed:** 0 / 21
+**Completed:** 1 / 21
 
 ### Status Key
 

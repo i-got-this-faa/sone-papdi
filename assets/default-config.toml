@@ -1,0 +1,8 @@
+# Default sone-papdi configuration.
+# This is a placeholder; the full schema will be implemented in the config subplan.
+
+[general]
+wm = "auto"
+terminal = "foot"
+file_manager = "thunar"
+browser = "firefox"

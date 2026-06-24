@@ -1,0 +1,13 @@
+[package]
+name = "rs-shell-clipboard"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "rs-shell-clipd"
+path = "src/main.rs"
+
+[dependencies]

@@ -23,32 +23,32 @@ None.
 
 ## Acceptance Criteria
 
-- [ ] `cargo build --workspace` exits 0.
-- [ ] `cargo test --workspace` exits 0 (empty test suites are fine).
-- [ ] `cargo clippy --workspace -- -D warnings` exits 0.
-- [ ] Directory layout matches the workspace layout from `implementation-plan.md`.
-- [ ] CI workflow file exists and runs on PR/push.
+- [x] `cargo build --workspace` exits 0.
+- [x] `cargo test --workspace` exits 0 (empty test suites are fine).
+- [x] `cargo clippy --workspace -- -D warnings` exits 0.
+- [x] Directory layout matches the workspace layout from `implementation-plan.md`.
+- [x] CI workflow file exists and runs on PR/push.
 
 ## Task Checklist
 
-- [ ] Create `Cargo.toml` workspace with members and shared dependencies.
-- [ ] Create `crates/rs-shell-core/Cargo.toml` + `src/lib.rs`.
-- [ ] Create `crates/rs-shell-config/Cargo.toml` + `src/lib.rs`.
-- [ ] Create `crates/rs-shell-clipboard/Cargo.toml` + `src/lib.rs`.
-- [ ] Create `crates/rs-shell-api/Cargo.toml` + `src/lib.rs`.
-- [ ] Create `crates/rs-shell-wm/Cargo.toml` + `src/lib.rs`.
-- [ ] Create `crates/rs-shell-services/Cargo.toml` + `src/lib.rs`.
-- [ ] Create `crates/rs-shell-ui/Cargo.toml` + `src/lib.rs`.
-- [ ] Create `crates/rs-shell-daemon/Cargo.toml` + `src/main.rs`.
-- [ ] Create `crates/rs-shell-bar/Cargo.toml` + `src/main.rs`.
-- [ ] Create `xtask/Cargo.toml` + `src/main.rs`.
-- [ ] Create `assets/themes/`, `assets/icons/`, `assets/default-config.toml`.
-- [ ] Create `packaging/systemd/`, `packaging/aur/`, `packaging/deb/`.
-- [ ] Create `scripts/install.sh`, `scripts/build-release-archive.sh`.
-- [ ] Add `.github/workflows/ci.yml`.
-- [ ] Add `.gitignore` and `rustfmt.toml`.
-- [ ] Run `cargo build --workspace` and fix errors.
-- [ ] Run `cargo clippy --workspace -- -D warnings` and fix warnings.
+- [x] Create `Cargo.toml` workspace with members and shared dependencies.
+- [x] Create `crates/rs-shell-core/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/rs-shell-config/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/rs-shell-clipboard/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/rs-shell-api/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/rs-shell-wm/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/rs-shell-services/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/rs-shell-ui/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/rs-shell-daemon/Cargo.toml` + `src/main.rs`.
+- [x] Create `crates/rs-shell-bar/Cargo.toml` + `src/main.rs`.
+- [x] Create `xtask/Cargo.toml` + `src/main.rs`.
+- [x] Create `assets/themes/`, `assets/icons/`, `assets/default-config.toml`.
+- [x] Create `packaging/systemd/`, `packaging/aur/`, `packaging/deb/`.
+- [x] Create `scripts/install.sh`, `scripts/build-release-archive.sh`.
+- [x] Add `.github/workflows/ci.yml`.
+- [x] Add `.gitignore` and `rustfmt.toml`.
+- [x] Run `cargo build --workspace` and fix errors.
+- [x] Run `cargo clippy --workspace -- -D warnings` and fix warnings.
 
 ## Verification
 
