@@ -1,185 +1,260 @@
-//! TOML configuration schema and hot-reload manager for sone-papdi.
+//! TOML configuration schema and hot-reload engine for sone-papdi.
 
-use anyhow::{Context, Result};
 use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
+use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::{watch, RwLock};
+use anyhow::Result;
 
-/// Top-level shell configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+// ── Top-level config ───────────────────────────────────────
+
+/// Parsed config, cloneable and shared across threads.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShellConfig {
-    /// General settings.
+    #[serde(default)]
     pub general: GeneralConfig,
-    /// Bar/panel configuration.
+    #[serde(default)]
     pub bar: BarConfig,
-    /// Clipboard configuration.
+    #[serde(default)]
     pub clipboard: ClipboardConfig,
-    /// Launcher configuration.
+    #[serde(default)]
     pub launcher: LauncherConfig,
-    /// Notification configuration.
+    #[serde(default)]
     pub notifications: NotificationConfig,
-    /// Battery configuration.
+    #[serde(default)]
     pub battery: BatteryConfig,
-    /// Audio configuration.
+    #[serde(default)]
     pub audio: AudioConfig,
-    /// Network configuration.
+    #[serde(default)]
     pub network: NetworkConfig,
-    /// Wallpaper configuration.
+    #[serde(default)]
     pub wallpaper: WallpaperConfig,
-    /// Theme configuration.
+    #[serde(default)]
     pub theme: ThemeConfig,
-    /// Lock screen configuration.
+    #[serde(default)]
     pub lockscreen: LockscreenConfig,
-    /// Keybind configuration.
+    #[serde(default)]
     pub keybinds: KeybindsConfig,
 }
 
 impl Default for ShellConfig {
     fn default() -> Self {
-        Self {
-            general: GeneralConfig::default(),
-            bar: BarConfig::default(),
-            clipboard: ClipboardConfig::default(),
-            launcher: LauncherConfig::default(),
-            notifications: NotificationConfig::default(),
-            battery: BatteryConfig::default(),
-            audio: AudioConfig::default(),
-            network: NetworkConfig::default(),
-            wallpaper: WallpaperConfig::default(),
-            theme: ThemeConfig::default(),
-            lockscreen: LockscreenConfig::default(),
-            keybinds: KeybindsConfig::default(),
-        }
+        // Parses assets/default-config.toml bundled at compile time
+        toml::from_str(include_str!("../../../assets/default-config.toml"))
+            .expect("default config must be valid")
     }
 }
 
 impl ShellConfig {
-    /// Expand `~` in paths that support it (wallpaper, theme user dirs).
+    /// Expand tilde paths in all applicable fields.
     pub fn expand_paths(&mut self) {
-        if let Ok(expanded) = expand_tilde::expand_tilde(&self.wallpaper.path) {
-            self.wallpaper.path = expanded.to_string_lossy().to_string();
+        if self.wallpaper.path.starts_with('~') {
+            self.wallpaper.path = expand_tilde(&self.wallpaper.path);
         }
     }
 }
 
-/// General compositor/application settings.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+// ── General ─────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GeneralConfig {
-    /// Window manager to use, or "auto" for detection.
+    #[serde(default = "default_wm")]
     pub wm: String,
-    /// Default terminal emulator.
+    #[serde(default = "default_terminal")]
     pub terminal: String,
-    /// Default file manager.
+    #[serde(default = "default_file_manager")]
     pub file_manager: String,
-    /// Default web browser.
+    #[serde(default = "default_browser")]
     pub browser: String,
+}
+
+fn default_wm() -> String {
+    "auto".into()
+}
+fn default_terminal() -> String {
+    "foot".into()
+}
+fn default_file_manager() -> String {
+    "thunar".into()
+}
+fn default_browser() -> String {
+    "firefox".into()
 }
 
 impl Default for GeneralConfig {
     fn default() -> Self {
         Self {
-            wm: "auto".into(),
-            terminal: "foot".into(),
-            file_manager: "thunar".into(),
-            browser: "firefox".into(),
+            wm: default_wm(),
+            terminal: default_terminal(),
+            file_manager: default_file_manager(),
+            browser: default_browser(),
         }
     }
 }
 
-/// Bar section configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
-pub struct BarSectionConfig {
-    /// Modules shown in this section.
-    pub modules: Vec<String>,
-}
+// ── Bar ─────────────────────────────────────────────────────
 
-impl Default for BarSectionConfig {
-    fn default() -> Self {
-        Self { modules: Vec::new() }
-    }
-}
-
-/// Clock module configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
-pub struct ClockConfig {
-    /// strftime format for the clock label.
-    pub format: String,
-}
-
-impl Default for ClockConfig {
-    fn default() -> Self {
-        Self {
-            format: "%a %d %b  %H:%M".into(),
-        }
-    }
-}
-
-/// Bar/panel configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BarConfig {
-    /// Bar position on screen.
+    #[serde(default = "default_bar_position")]
     pub position: String,
-    /// Bar height in pixels.
+    #[serde(default = "default_bar_height")]
     pub height: u32,
-    /// Background opacity (0.0–1.0).
+    #[serde(default = "default_bar_opacity")]
     pub opacity: f64,
-    /// Primary font.
+    #[serde(default = "default_bar_font")]
     pub font: String,
-    /// Whether to reserve screen space for the bar.
+    #[serde(default = "default_true")]
     pub exclusive_zone: bool,
-    /// Left section.
+    #[serde(default)]
     pub left: BarSectionConfig,
-    /// Center section.
+    #[serde(default)]
     pub center: BarSectionConfig,
-    /// Right section.
+    #[serde(default)]
     pub right: BarSectionConfig,
-    /// Clock module config.
+    #[serde(default)]
     pub clock: ClockConfig,
+}
+
+fn default_bar_position() -> String {
+    "top".into()
+}
+fn default_bar_height() -> u32 {
+    32
+}
+fn default_bar_opacity() -> f64 {
+    0.92
+}
+fn default_bar_font() -> String {
+    "JetBrains Mono 10".into()
+}
+fn default_true() -> bool {
+    true
 }
 
 impl Default for BarConfig {
     fn default() -> Self {
         Self {
-            position: "top".into(),
-            height: 32,
-            opacity: 0.92,
-            font: "JetBrains Mono 10".into(),
+            position: default_bar_position(),
+            height: default_bar_height(),
+            opacity: default_bar_opacity(),
+            font: default_bar_font(),
             exclusive_zone: true,
-            left: BarSectionConfig { modules: vec!["workspaces".into(), "window-title".into()] },
-            center: BarSectionConfig { modules: vec!["clock".into()] },
-            right: BarSectionConfig {
-                modules: vec![
-                    "systray".into(),
-                    "audio".into(),
-                    "network".into(),
-                    "battery".into(),
-                    "notifications".into(),
-                ],
-            },
+            left: BarSectionConfig::default(),
+            center: BarSectionConfig::default(),
+            right: BarSectionConfig::default(),
             clock: ClockConfig::default(),
         }
     }
 }
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct BarSectionConfig {
+    #[serde(default)]
+    pub modules: Vec<String>,
+}
 
-/// Clipboard UI configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClockConfig {
+    #[serde(default = "default_clock_format")]
+    pub format: String,
+}
+
+fn default_clock_format() -> String {
+    "%a %d %b  %H:%M".into()
+}
+
+impl Default for ClockConfig {
+    fn default() -> Self {
+        Self {
+            format: default_clock_format(),
+        }
+    }
+}
+
+// ── Clipboard ───────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClipboardConfig {
+    #[serde(default = "default_max_entries")]
+    pub max_entries: i64,
+    #[serde(default = "default_max_text_bytes")]
+    pub max_text_bytes: usize,
+    #[serde(default = "default_max_image_bytes")]
+    pub max_image_bytes: usize,
+    #[serde(default = "default_true")]
+    pub dedupe: bool,
+    #[serde(default = "default_cleanup_days")]
+    pub cleanup_unpinned_after_days: i64,
+    #[serde(default = "default_true")]
+    pub auto_paste: bool,
+    #[serde(default = "default_paste_delay")]
+    pub paste_delay_ms: u64,
+    #[serde(default = "default_paste_method")]
+    pub paste_method: String,
+    #[serde(default = "default_true")]
+    pub favicon_cache: bool,
+    #[serde(default)]
+    pub ui: ClipboardUiConfig,
+}
+
+fn default_max_entries() -> i64 {
+    5000
+}
+fn default_max_text_bytes() -> usize {
+    1048576
+}
+fn default_max_image_bytes() -> usize {
+    10485760
+}
+fn default_cleanup_days() -> i64 {
+    30
+}
+fn default_paste_delay() -> u64 {
+    140
+}
+fn default_paste_method() -> String {
+    "wtype".into()
+}
+
+impl Default for ClipboardConfig {
+    fn default() -> Self {
+        Self {
+            max_entries: default_max_entries(),
+            max_text_bytes: default_max_text_bytes(),
+            max_image_bytes: default_max_image_bytes(),
+            dedupe: true,
+            cleanup_unpinned_after_days: 30,
+            auto_paste: true,
+            paste_delay_ms: 140,
+            paste_method: default_paste_method(),
+            favicon_cache: true,
+            ui: ClipboardUiConfig::default(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClipboardUiConfig {
-    /// Window width in pixels.
+    #[serde(default = "default_ui_width")]
     pub window_width: u32,
-    /// Window height in pixels.
+    #[serde(default = "default_ui_height")]
     pub window_height: u32,
-    /// Background opacity (0.0–1.0).
+    #[serde(default = "default_ui_opacity")]
     pub background_opacity: f64,
-    /// Show preview by default.
+    #[serde(default = "default_true")]
     pub preview_default: bool,
+}
+
+fn default_ui_width() -> u32 {
+    920
+}
+fn default_ui_height() -> u32 {
+    620
+}
+fn default_ui_opacity() -> f64 {
+    0.70
 }
 
 impl Default for ClipboardUiConfig {
@@ -193,63 +268,30 @@ impl Default for ClipboardUiConfig {
     }
 }
 
-/// Clipboard configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
-pub struct ClipboardConfig {
-    /// Maximum history entries.
-    pub max_entries: usize,
-    /// Maximum bytes for a text entry.
-    pub max_text_bytes: usize,
-    /// Maximum bytes for an image entry.
-    pub max_image_bytes: usize,
-    /// Remove duplicate entries.
-    pub dedupe: bool,
-    /// Days before unpinned old entries are cleaned.
-    pub cleanup_unpinned_after_days: u32,
-    /// Automatically paste selected entries.
-    pub auto_paste: bool,
-    /// Delay before pasting, in milliseconds.
-    pub paste_delay_ms: u64,
-    /// Paste automation backend.
-    pub paste_method: String,
-    /// Cache website favicons for link entries.
-    pub favicon_cache: bool,
-    /// UI-specific configuration.
-    pub ui: ClipboardUiConfig,
-}
+// ── Launcher ────────────────────────────────────────────────
 
-impl Default for ClipboardConfig {
-    fn default() -> Self {
-        Self {
-            max_entries: 5000,
-            max_text_bytes: 1_048_576,
-            max_image_bytes: 10_485_760,
-            dedupe: true,
-            cleanup_unpinned_after_days: 30,
-            auto_paste: true,
-            paste_delay_ms: 140,
-            paste_method: "wtype".into(),
-            favicon_cache: true,
-            ui: ClipboardUiConfig::default(),
-        }
-    }
-}
-
-/// Launcher configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LauncherConfig {
-    /// Window width in pixels.
+    #[serde(default = "default_launcher_width")]
     pub width: u32,
-    /// Maximum results shown.
+    #[serde(default = "default_max_results")]
     pub max_results: usize,
-    /// Show application icons.
+    #[serde(default = "default_true")]
     pub show_icons: bool,
-    /// Use fuzzy matching.
+    #[serde(default = "default_true")]
     pub fuzzy: bool,
-    /// Terminal command prefix for terminal apps.
+    #[serde(default = "default_terminal_prefix")]
     pub terminal_prefix: String,
+}
+
+fn default_launcher_width() -> u32 {
+    600
+}
+fn default_max_results() -> usize {
+    12
+}
+fn default_terminal_prefix() -> String {
+    "foot -e".into()
 }
 
 impl Default for LauncherConfig {
@@ -259,27 +301,43 @@ impl Default for LauncherConfig {
             max_results: 12,
             show_icons: true,
             fuzzy: true,
-            terminal_prefix: "foot -e".into(),
+            terminal_prefix: default_terminal_prefix(),
         }
     }
 }
 
-/// Notification configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+// ── Notifications ───────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NotificationConfig {
-    /// Default timeout for normal notifications, in milliseconds.
-    pub timeout_ms: u64,
-    /// Timeout for critical notifications; 0 means never auto-dismiss.
-    pub timeout_critical_ms: u64,
-    /// Maximum visible notifications at once.
+    #[serde(default = "default_timeout_ms")]
+    pub timeout_ms: i64,
+    #[serde(default)]
+    pub timeout_critical_ms: i64,
+    #[serde(default = "default_max_visible")]
     pub max_visible: usize,
-    /// OSD anchor position.
+    #[serde(default = "default_notif_position")]
     pub position: String,
-    /// Gap between OSD popups in pixels.
+    #[serde(default = "default_notif_gap")]
     pub gap: u32,
-    /// OSD popup width in pixels.
+    #[serde(default = "default_notif_width")]
     pub width: u32,
+}
+
+fn default_timeout_ms() -> i64 {
+    5000
+}
+fn default_max_visible() -> usize {
+    5
+}
+fn default_notif_position() -> String {
+    "top-right".into()
+}
+fn default_notif_gap() -> u32 {
+    8
+}
+fn default_notif_width() -> u32 {
+    360
 }
 
 impl Default for NotificationConfig {
@@ -288,23 +346,33 @@ impl Default for NotificationConfig {
             timeout_ms: 5000,
             timeout_critical_ms: 0,
             max_visible: 5,
-            position: "top-right".into(),
+            position: default_notif_position(),
             gap: 8,
             width: 360,
         }
     }
 }
 
-/// Battery configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+// ── Battery ─────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BatteryConfig {
-    /// Percentage at which to emit a low-battery warning.
+    #[serde(default = "default_warn_level")]
     pub warn_level: f64,
-    /// Percentage at which to emit a critical-battery warning.
+    #[serde(default = "default_critical_level")]
     pub critical_level: f64,
-    /// UPower device path, or "auto" for the display device.
+    #[serde(default = "default_device")]
     pub device: String,
+}
+
+fn default_warn_level() -> f64 {
+    20.0
+}
+fn default_critical_level() -> f64 {
+    5.0
+}
+fn default_device() -> String {
+    "auto".into()
 }
 
 impl Default for BatteryConfig {
@@ -317,16 +385,26 @@ impl Default for BatteryConfig {
     }
 }
 
-/// Audio configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+// ── Audio ───────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AudioConfig {
-    /// Audio backend to use.
+    #[serde(default = "default_audio_backend")]
     pub backend: String,
-    /// Maximum allowed volume percentage.
+    #[serde(default = "default_max_volume")]
     pub max_volume: u32,
-    /// Volume step on scroll.
+    #[serde(default = "default_scroll_step")]
     pub scroll_step: u32,
+}
+
+fn default_audio_backend() -> String {
+    "auto".into()
+}
+fn default_max_volume() -> u32 {
+    150
+}
+fn default_scroll_step() -> u32 {
+    5
 }
 
 impl Default for AudioConfig {
@@ -339,12 +417,16 @@ impl Default for AudioConfig {
     }
 }
 
-/// Network configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+// ── Network ─────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NetworkConfig {
-    /// Primary network interface, or "auto".
+    #[serde(default = "default_primary_interface")]
     pub primary_interface: String,
+}
+
+fn default_primary_interface() -> String {
+    "auto".into()
 }
 
 impl Default for NetworkConfig {
@@ -355,117 +437,155 @@ impl Default for NetworkConfig {
     }
 }
 
-/// Wallpaper configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+// ── Wallpaper ───────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WallpaperConfig {
-    /// Path to wallpaper image.
+    #[serde(default = "default_wallpaper_path")]
     pub path: String,
-    /// Fill mode.
+    #[serde(default = "default_wallpaper_mode")]
     pub mode: String,
-    /// Backend used to apply the wallpaper.
+    #[serde(default = "default_wallpaper_backend")]
     pub backend: String,
+}
+
+fn default_wallpaper_path() -> String {
+    "~/.config/rs-shell/wallpaper.jpg".into()
+}
+fn default_wallpaper_mode() -> String {
+    "fill".into()
+}
+fn default_wallpaper_backend() -> String {
+    "internal".into()
 }
 
 impl Default for WallpaperConfig {
     fn default() -> Self {
         Self {
-            path: "~/.config/rs-shell/wallpaper.jpg".into(),
+            path: default_wallpaper_path(),
             mode: "fill".into(),
             backend: "internal".into(),
         }
     }
 }
 
-/// Theme color overrides.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
-#[serde(default)]
-pub struct ThemeColors {
-    /// Accent color.
-    pub accent: Option<String>,
-    /// Text color on accent.
-    pub accent_text: Option<String>,
+// ── Theme ───────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ThemeConfig {
+    #[serde(default = "default_theme_name")]
+    pub name: String,
+    #[serde(default = "default_true")]
+    pub dark_mode: bool,
+    #[serde(default = "default_icon_theme")]
+    pub icon_theme: String,
+    #[serde(default = "default_gtk_theme")]
+    pub gtk_theme: String,
+    #[serde(default = "default_theme_font")]
+    pub font: String,
+    #[serde(default)]
+    pub colors: ThemeColors,
 }
 
-/// Theme configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
-pub struct ThemeConfig {
-    /// Theme name.
-    pub name: String,
-    /// Whether dark mode is enabled.
-    pub dark_mode: bool,
-    /// Icon theme name.
-    pub icon_theme: String,
-    /// GTK theme name.
-    pub gtk_theme: String,
-    /// Primary UI font.
-    pub font: String,
-    /// Color overrides.
-    pub colors: ThemeColors,
+fn default_theme_name() -> String {
+    "nonchalant-dark".into()
+}
+fn default_icon_theme() -> String {
+    "Papirus-Dark".into()
+}
+fn default_gtk_theme() -> String {
+    "adw-gtk3-dark".into()
+}
+fn default_theme_font() -> String {
+    "Inter 11".into()
 }
 
 impl Default for ThemeConfig {
     fn default() -> Self {
         Self {
-            name: "nonchalant-dark".into(),
+            name: default_theme_name(),
             dark_mode: true,
-            icon_theme: "Papirus-Dark".into(),
-            gtk_theme: "adw-gtk3-dark".into(),
-            font: "Inter 11".into(),
+            icon_theme: default_icon_theme(),
+            gtk_theme: default_gtk_theme(),
+            font: default_theme_font(),
             colors: ThemeColors::default(),
         }
     }
 }
 
-/// Lock screen configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+/// Flat map of color overrides. Missing keys inherit from the named theme.
+pub type ThemeColors = HashMap<String, String>;
+
+// ── Lock Screen ─────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LockscreenConfig {
-    /// External lock command.
+    #[serde(default = "default_lockscreen_command")]
     pub command: String,
-    /// Blur the background behind the lock screen.
+    #[serde(default = "default_true")]
     pub blur_background: bool,
+}
+
+fn default_lockscreen_command() -> String {
+    "swaylock".into()
 }
 
 impl Default for LockscreenConfig {
     fn default() -> Self {
         Self {
-            command: "swaylock".into(),
+            command: default_lockscreen_command(),
             blur_background: true,
         }
     }
 }
 
-/// Keybind configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(default)]
+// ── Keybinds ────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KeybindsConfig {
-    /// Show launcher.
+    #[serde(default = "default_kb_show_launcher")]
     pub show_launcher: String,
-    /// Show clipboard manager.
+    #[serde(default = "default_kb_show_clipboard")]
     pub show_clipboard: String,
-    /// Show notification center.
+    #[serde(default = "default_kb_show_notifications")]
     pub show_notifications: String,
-    /// Screenshot key.
+    #[serde(default = "default_kb_screenshot")]
     pub screenshot: String,
-    /// Lock screen key.
+    #[serde(default = "default_kb_lock")]
     pub lock: String,
+}
+
+fn default_kb_show_launcher() -> String {
+    "Super+Space".into()
+}
+fn default_kb_show_clipboard() -> String {
+    "Super+V".into()
+}
+fn default_kb_show_notifications() -> String {
+    "Super+N".into()
+}
+fn default_kb_screenshot() -> String {
+    "Print".into()
+}
+fn default_kb_lock() -> String {
+    "Super+L".into()
 }
 
 impl Default for KeybindsConfig {
     fn default() -> Self {
         Self {
-            show_launcher: "Super+Space".into(),
-            show_clipboard: "Super+V".into(),
-            show_notifications: "Super+N".into(),
-            screenshot: "Print".into(),
-            lock: "Super+L".into(),
+            show_launcher: default_kb_show_launcher(),
+            show_clipboard: default_kb_show_clipboard(),
+            show_notifications: default_kb_show_notifications(),
+            screenshot: default_kb_screenshot(),
+            lock: default_kb_lock(),
         }
     }
 }
 
-/// Manager that owns the current config and notifies subscribers of changes.
+// ── Config Manager ──────────────────────────────────────────
+
+/// Watches a config file for changes, hot-reloads on modification.
 pub struct ConfigManager {
     config: Arc<RwLock<ShellConfig>>,
     sender: watch::Sender<ShellConfig>,
@@ -473,13 +593,15 @@ pub struct ConfigManager {
 }
 
 impl ConfigManager {
-    /// Load or create the user config and return the manager plus a watch receiver.
+    /// Create a new ConfigManager. Loads the config file or writes defaults.
+    /// Returns the manager and a watch channel receiver.
     pub async fn new() -> Result<(Self, watch::Receiver<ShellConfig>)> {
         let path = config_path();
         let config = if path.exists() {
             load_config(&path).await?
         } else {
             let default = ShellConfig::default();
+            // Write default config on first run
             if let Some(parent) = path.parent() {
                 tokio::fs::create_dir_all(parent).await?;
             }
@@ -497,17 +619,20 @@ impl ConfigManager {
         Ok((mgr, receiver))
     }
 
-    /// Start the file watcher loop. Spawns a background task.
+    /// Start the file watcher loop (call in a `tokio::spawn`).
     pub async fn watch(self: Arc<Self>) -> Result<()> {
+        use tokio::sync::mpsc;
+
         let path = self.path.clone();
-        let (tx, mut rx) = tokio::sync::mpsc::channel::<()>(8);
+        let (tx, mut rx) = mpsc::channel::<()>(8);
 
         let mut watcher = RecommendedWatcher::new(
             move |res: notify::Result<Event>| {
-                if let Ok(event) = res {
-                    if event.kind.is_modify() || event.kind.is_create() {
-                        let _ = tx.try_send(());
-                    }
+                if res
+                    .map(|e| e.kind.is_modify() || e.kind.is_create())
+                    .unwrap_or(false)
+                {
+                    let _ = tx.try_send(());
                 }
             },
             notify::Config::default(),
@@ -515,16 +640,17 @@ impl ConfigManager {
 
         watcher.watch(&path, RecursiveMode::NonRecursive)?;
 
+        // Debounce 150ms
         loop {
             if rx.recv().await.is_none() {
                 break;
             }
             tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+            // Drain any extra events accumulated during debounce
             while rx.try_recv().is_ok() {}
 
             match load_config(&path).await {
-                Ok(mut new_cfg) => {
-                    new_cfg.expand_paths();
+                Ok(new_cfg) => {
                     *self.config.write().await = new_cfg.clone();
                     let _ = self.sender.send(new_cfg);
                     tracing::info!("config hot-reloaded");
@@ -536,98 +662,203 @@ impl ConfigManager {
         Ok(())
     }
 
-    /// Return a copy of the current config.
+    /// Get the current config.
     pub async fn get(&self) -> ShellConfig {
         self.config.read().await.clone()
     }
-
-    /// Return a clone of the watch sender.
-    pub fn sender(&self) -> watch::Sender<ShellConfig> {
-        self.sender.clone()
-    }
 }
 
-/// Path to the user config file (`~/.config/rs-shell/config.toml`).
-pub fn config_path() -> PathBuf {
-    if let Ok(dir) = std::env::var("XDG_CONFIG_HOME") {
-        return PathBuf::from(dir).join("rs-shell/config.toml");
-    }
-    dirs_next::config_dir()
-        .map(|p| p.join("rs-shell/config.toml"))
-        .unwrap_or_else(|| PathBuf::from("/tmp/rs-shell-config/config.toml"))
-}
+// ── Helpers ─────────────────────────────────────────────────
 
-async fn load_config(path: &Path) -> Result<ShellConfig> {
-    let text = tokio::fs::read_to_string(path)
-        .await
-        .with_context(|| format!("failed to read config from {}", path.display()))?;
-    let mut cfg: ShellConfig = toml::from_str(&text)
-        .with_context(|| format!("failed to parse config from {}", path.display()))?;
+/// Load config from a TOML file, merging with defaults.
+pub async fn load_config(path: &PathBuf) -> Result<ShellConfig> {
+    let text = tokio::fs::read_to_string(path).await?;
+    let mut cfg: ShellConfig = toml::from_str(&text)?;
+    // Merge with defaults for any missing keys (serde default handles this)
     cfg.expand_paths();
     Ok(cfg)
 }
 
+/// Returns the default config file path: `~/.config/rs-shell/config.toml`.
+pub fn config_path() -> PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/root".to_string());
+    PathBuf::from(home).join(".config/rs-shell/config.toml")
+}
+
+/// Expand tilde in a path string to the user's home directory.
+fn expand_tilde(path: &str) -> String {
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/root".to_string());
+    if path.starts_with("~/") {
+        format!("{}{}", home.trim_end_matches('/'), &path[1..])
+    } else if path == "~" {
+        home
+    } else {
+        path.to_string()
+    }
+}
+
+// ── Tests ──────────────────────────────────────────────────
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Write;
 
-    #[tokio::test]
-    async fn default_config_parses() {
-        let cfg = ShellConfig::default();
-        assert_eq!(cfg.general.wm, "auto");
-        assert_eq!(cfg.bar.height, 32);
-        assert_eq!(cfg.clipboard.paste_method, "wtype");
+    #[test]
+    fn test_default_config_parses() {
+        // ShellConfig::default() parses the bundled default config
+        let config = ShellConfig::default();
+        assert_eq!(config.general.wm, "auto");
+        assert_eq!(config.general.terminal, "foot");
+        assert_eq!(config.bar.position, "top");
+        assert_eq!(config.bar.height, 32);
+        assert_eq!(config.clipboard.max_entries, 5000);
+        assert_eq!(config.theme.name, "nonchalant-dark");
+        assert_eq!(config.lockscreen.command, "swaylock");
+        assert_eq!(config.keybinds.show_launcher, "Super+Space");
+    }
+
+    #[test]
+    fn test_config_override_merges_correctly() {
+        // A partial config file should merge with defaults for missing keys.
+        let partial = r#"
+[general]
+wm = "sway"
+terminal = "alacritty"
+"#;
+        let mut cfg: ShellConfig = toml::from_str(partial).unwrap();
+        cfg.expand_paths();
+        assert_eq!(cfg.general.wm, "sway");
+        assert_eq!(cfg.general.terminal, "alacritty");
+        // Defaults for unspecified fields
+        assert_eq!(cfg.general.file_manager, "thunar");
+        assert_eq!(cfg.general.browser, "firefox");
+        assert_eq!(cfg.bar.position, "top");
+        assert_eq!(cfg.clipboard.max_entries, 5000);
+        assert_eq!(cfg.theme.name, "nonchalant-dark");
+    }
+
+    #[test]
+    fn test_partial_bar_config() {
+        let partial = r#"
+[bar]
+height = 48
+"#;
+        let cfg: ShellConfig = toml::from_str(partial).unwrap();
+        assert_eq!(cfg.bar.height, 48);
+        assert_eq!(cfg.bar.position, "top"); // default
+        assert_eq!(cfg.bar.opacity, 0.92);   // default
+}
+    #[test]
+    fn test_partial_theme_config() {
+        let partial = r##"
+[theme]
+name = "catppuccin-mocha"
+[theme.colors]
+accent = "#89b4fa"
+"##;
+        let cfg: ShellConfig = toml::from_str(partial).unwrap();
+        assert_eq!(cfg.theme.name, "catppuccin-mocha");
+        assert_eq!(cfg.theme.colors.get("accent").unwrap(), "#89b4fa");
+        assert!(cfg.theme.dark_mode); // default
+    }
+
+    #[test]
+    fn test_expand_tilde() {
+        let expanded = expand_tilde("~/wallpaper.jpg");
+        assert!(!expanded.starts_with('~'), "tilde should be expanded");
+        assert!(expanded.ends_with("/wallpaper.jpg"));
+    }
+
+    #[test]
+    fn test_expand_paths_in_config() {
+        let mut cfg = ShellConfig::default();
+        assert!(cfg.wallpaper.path.starts_with('~'));
+        cfg.expand_paths();
+        assert!(!cfg.wallpaper.path.starts_with('~'));
     }
 
     #[tokio::test]
-    async fn config_manager_creates_default() {
-        let tmp = tempfile::tempdir().unwrap();
-        std::env::set_var("XDG_CONFIG_HOME", tmp.path().as_os_str());
+    async fn test_config_file_write_and_read() {
+        // Create a temp dir and write a config file
+        let dir = tempfile::tempdir().unwrap();
+        let config_path = dir.path().join("config.toml");
 
-        let expected_file = tmp.path().join("rs-shell/config.toml");
+        let default = ShellConfig::default();
+        let toml_str = toml::to_string_pretty(&default).unwrap();
+        tokio::fs::write(&config_path, &toml_str)
+            .await
+            .unwrap();
+
+        // Read it back
+        let loaded = load_config(&config_path).await.unwrap();
+        assert_eq!(loaded.general.wm, default.general.wm);
+        assert_eq!(loaded.bar.height, default.bar.height);
+    }
+
+    #[tokio::test]
+    async fn test_parse_error_does_not_panic() {
+        // Write invalid TOML
+        let dir = tempfile::tempdir().unwrap();
+        let config_path = dir.path().join("config.toml");
+        tokio::fs::write(&config_path, "invalid toml ====")
+            .await
+            .unwrap();
+
+        let result = load_config(&config_path).await;
+        assert!(result.is_err(), "invalid TOML should produce an error");
+    }
+
+    #[tokio::test]
+    async fn test_config_manager_creates_default() {
+        // ConfigManager::new() in a temp dir should write the default config
+        let orig_home = std::env::var("HOME").ok();
+        let dir = tempfile::tempdir().unwrap();
+        std::env::set_var("HOME", dir.path());
+
         let (mgr, _rx) = ConfigManager::new().await.unwrap();
         let cfg = mgr.get().await;
-        assert!(expected_file.exists());
-        assert_eq!(cfg.theme.name, "nonchalant-dark");
+        assert_eq!(cfg.general.wm, "auto");
 
-        std::env::remove_var("XDG_CONFIG_HOME");
+        // Check file was created
+        let config_path = dir.path().join(".config/rs-shell/config.toml");
+        assert!(config_path.exists(), "default config should be written");
+
+        if let Some(home) = orig_home {
+            std::env::set_var("HOME", home);
+        }
     }
 
     #[tokio::test]
-    #[ignore = "stack overflow in test watcher; manual smoke test recommended"]
-    async fn config_hot_reload() {
-        let tmp = tempfile::tempdir().unwrap();
-        std::env::set_var("XDG_CONFIG_HOME", tmp.path().as_os_str());
+    async fn test_config_manager_loads_existing() {
+        let dir = tempfile::tempdir().unwrap();
+        let config_dir = dir.path().join(".config/rs-shell");
+        tokio::fs::create_dir_all(&config_dir).await.unwrap();
+        let config_path = config_dir.join("config.toml");
 
-        let (mgr, mut rx) = ConfigManager::new().await.unwrap();
-        let mgr = Arc::new(mgr);
+        // Write a modified config
+        let custom = r#"
+[general]
+wm = "hyprland"
+terminal = "kitty"
 
-        // Wait for the initial value.
-        let _ = rx.changed().await;
-        assert_eq!(rx.borrow().bar.height, 32);
+[bar]
+height = 40
+"#;
+        tokio::fs::write(&config_path, custom).await.unwrap();
 
-        let watcher = mgr.clone();
-        let handle = tokio::spawn(async move { watcher.watch().await });
+        let orig_home = std::env::var("HOME").ok();
+        std::env::set_var("HOME", dir.path());
 
-        // Rewrite the file.
-        let config_file = config_path();
-        let mut file = std::fs::OpenOptions::new()
-            .write(true)
-            .truncate(true)
-            .open(&config_file)
-            .unwrap();
-        writeln!(file, r#"[bar]
-height = 64"#).unwrap();
-        drop(file);
+        let (mgr, _rx) = ConfigManager::new().await.unwrap();
+        let cfg = mgr.get().await;
+        assert_eq!(cfg.general.wm, "hyprland");
+        assert_eq!(cfg.general.terminal, "kitty");
+        assert_eq!(cfg.bar.height, 40);
+        // Defaults still apply
+        assert_eq!(cfg.theme.name, "nonchalant-dark");
 
-        // Wait for reload.
-        let timeout = tokio::time::Duration::from_secs(5);
-        let changed = tokio::time::timeout(timeout, rx.changed()).await;
-        assert!(changed.is_ok(), "config reload did not fire");
-        assert_eq!(rx.borrow().bar.height, 64);
-
-        handle.abort();
-        std::env::remove_var("XDG_CONFIG_HOME");
+        if let Some(home) = orig_home {
+            std::env::set_var("HOME", home);
+        }
     }
 }

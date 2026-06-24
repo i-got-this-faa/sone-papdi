@@ -1,0 +1,137 @@
+{
+  "id": "019ef9d6-3306-7418-a4e7-1ee74e06d58f",
+  "name": "Core IPC & Event Bus",
+  "description": "start with the implementation plans",
+  "status": "paused",
+  "worktree": {
+    "path": "/home/cier/projects/sone-papdi",
+    "branch": "trunk",
+    "commit": "4b152cb6f7f0b66afbd8ab2732209e227d549065"
+  },
+  "scoping": {
+    "goal": {
+      "answer": "Implement rs-shell-core: the typed event types, in-process broadcast EventBus, length-prefixed JSON Unix-socket IPC protocol, and XDG-compliant runtime socket paths that every other crate depends on.",
+      "confirmedAt": "2026-06-24T15:18:21.454Z"
+    },
+    "criteria": {
+      "answer": "`ShellEvent` and all nested payload types compile and derive `Serialize`/`Deserialize`; verified by `cargo check -p rs-shell-core`.\n`EventBus` supports `publish`, `subscribe`, and `subscribe_filtered` as a `Stream`; covered by passing unit tests.\nUnix socket IPC uses a length-prefixed JSON frame over `tokio::net::UnixStream` and round-trips correctly; covered by a passing unit test.\nRuntime socket paths follow Wayland/XDG conventions (`$XDG_RUNTIME_DIR` with fallback to `/run/user/<uid>/`) so they coexist alongside tools like `wl-clipboard`; path format verified by unit tests.\nAll public types carry doc comments and the crate passes `cargo clippy -p rs-shell-core -- -D warnings`.\nFull verification: `cargo test -p rs-shell-core` and `cargo clippy -p rs-shell-core -- -D warnings` both pass.",
+      "confirmedAt": "2026-06-24T15:18:21.454Z"
+    },
+    "constraints": {
+      "answer": "Keep rs-shell-core free of GTK, D-Bus server, or compositor-specific code., Socket paths must be XDG/Wayland-compliant and not conflict with other tools., Do not modify unrelated crates; this ferment targets rs-shell-core only., Build on the existing scaffold (Cargo workspace and crate skeletons already created).",
+      "confirmedAt": "2026-06-24T15:18:21.454Z"
+    },
+    "phases": {
+      "answer": "Implement Core IPC & Event Bus",
+      "confirmedAt": "2026-06-24T15:18:21.454Z"
+    },
+    "assumptions": {
+      "answer": "Subplan 00 (Scaffold) is complete and `cargo build --workspace` already passes.; The user wants to implement Subplan 01 (Core IPC & Event Bus) first, before Subplan 02 (Config).; Dependencies listed in the root Cargo.toml (tokio, serde, serde_json, futures, tokio-stream, anyhow, thiserror, tracing, chrono, bytes, uuid) are acceptable to use.; Unit tests can use temp directories and temp Unix sockets; no live Wayland session is required.; Event type schema from implementation-plan.md Section 4.1 is the source of truth.",
+      "confirmedAt": "2026-06-24T15:18:21.454Z"
+    }
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "index": 1,
+      "name": "Implement Core IPC & Event Bus",
+      "goal": "Deliver a complete, tested rs-shell-core crate that other crates can depend on for events, bus, IPC, and socket paths.",
+      "description": "Create events.rs, bus.rs, ipc.rs, paths.rs, and lib.rs for rs-shell-core. Define all ShellEvent variants and payloads, implement EventBus on tokio::sync::broadcast, implement length-prefixed JSON IPC framing, implement XDG-compliant socket paths, and add unit tests for serialization, round-trip IPC, filtered subscriptions, and path resolution.",
+      "parallel": false,
+      "status": "planned",
+      "steps": [
+        {
+          "id": "step-1",
+          "index": 1,
+          "description": "Define all event payload types in events.rs with serde derives.",
+          "status": "pending",
+          "verification": {
+            "command": "cargo check -p rs-shell-core",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-2",
+          "index": 2,
+          "description": "Implement EventBus with publish, subscribe, and subscribe_filtered.",
+          "status": "pending",
+          "verification": {
+            "command": "cargo test -p rs-shell-core bus",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-3",
+          "index": 3,
+          "description": "Implement IPC message enums and send_message/recv_message framing.",
+          "status": "pending",
+          "verification": {
+            "command": "cargo test -p rs-shell-core ipc",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-4",
+          "index": 4,
+          "description": "Implement XDG runtime socket paths in paths.rs.",
+          "status": "pending",
+          "verification": {
+            "command": "cargo test -p rs-shell-core paths",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-5",
+          "index": 5,
+          "description": "Add lib.rs re-exports and doc comments on public types.",
+          "status": "pending",
+          "verification": {
+            "command": "cargo clippy -p rs-shell-core -- -D warnings",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-6",
+          "index": 6,
+          "description": "Run full crate verification.",
+          "status": "pending",
+          "verification": {
+            "command": "cargo test -p rs-shell-core && cargo clippy -p rs-shell-core -- -D warnings",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        }
+      ]
+    }
+  ],
+  "decisions": [],
+  "memories": [],
+  "createdAt": "2026-06-24T13:33:45.094Z",
+  "updatedAt": "2026-06-24T15:36:08.026Z",
+  "goal": "Implement rs-shell-core: the typed event types, in-process broadcast EventBus, length-prefixed JSON Unix-socket IPC protocol, and XDG-compliant runtime socket paths that every other crate depends on.",
+  "successCriteria": [
+    "`ShellEvent` and all nested payload types compile and derive `Serialize`/`Deserialize`; verified by `cargo check -p rs-shell-core`.",
+    "`EventBus` supports `publish`, `subscribe`, and `subscribe_filtered` as a `Stream`; covered by passing unit tests.",
+    "Unix socket IPC uses a length-prefixed JSON frame over `tokio::net::UnixStream` and round-trips correctly; covered by a passing unit test.",
+    "Runtime socket paths follow Wayland/XDG conventions (`$XDG_RUNTIME_DIR` with fallback to `/run/user/<uid>/`) so they coexist alongside tools like `wl-clipboard`; path format verified by unit tests.",
+    "All public types carry doc comments and the crate passes `cargo clippy -p rs-shell-core -- -D warnings`.",
+    "Full verification: `cargo test -p rs-shell-core` and `cargo clippy -p rs-shell-core -- -D warnings` both pass."
+  ],
+  "constraints": [
+    "Keep rs-shell-core free of GTK, D-Bus server, or compositor-specific code.",
+    "Socket paths must be XDG/Wayland-compliant and not conflict with other tools.",
+    "Do not modify unrelated crates; this ferment targets rs-shell-core only.",
+    "Build on the existing scaffold (Cargo workspace and crate skeletons already created)."
+  ]
+}

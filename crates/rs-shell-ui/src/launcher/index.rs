@@ -82,7 +82,7 @@ pub fn scan_applications() -> Result<Vec<AppEntry>> {
         }
     }
 
-    entries.sort_by(|a, b| a.name.to_ascii_lowercase().cmp(&b.name.to_ascii_lowercase()));
+    entries.sort_by_key(|a| a.name.to_ascii_lowercase());
     Ok(entries)
 }
 

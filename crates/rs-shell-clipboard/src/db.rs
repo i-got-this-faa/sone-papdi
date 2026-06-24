@@ -227,8 +227,8 @@ fn row_to_entry(row: &rusqlite::Row<'_>) -> rusqlite::Result<ClipEntry> {
         preview: row.get("preview")?,
         content: row.get("content")?,
         pinned: row.get::<_, i64>("pinned")? != 0,
-        created_at: chrono::DateTime::from_timestamp(created_at, 0).unwrap_or_else(|| chrono::Utc::now()),
-        updated_at: chrono::DateTime::from_timestamp(updated_at, 0).unwrap_or_else(|| chrono::Utc::now()),
+        created_at: chrono::DateTime::from_timestamp(created_at, 0).unwrap_or_else(chrono::Utc::now),
+        updated_at: chrono::DateTime::from_timestamp(updated_at, 0).unwrap_or_else(chrono::Utc::now),
     })
 }
 
@@ -252,7 +252,7 @@ mod tests {
 
     fn text_entry(text: &str) -> NewClipEntry {
         NewClipEntry {
-            content_hash: blake3::hash(text.as_bytes()).to_string(),
+            content_hash: crate::hash::content_hash(text.as_bytes()),
             mime: "text/plain".into(),
             kind: ClipEntryKind::Text,
             preview: text.chars().take(80).collect(),

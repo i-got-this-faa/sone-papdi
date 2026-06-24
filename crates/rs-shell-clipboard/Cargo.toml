@@ -11,18 +11,25 @@ name = "rs-shell-clipd"
 path = "src/main.rs"
 
 [dependencies]
-rs-shell-core   = { path = "../rs-shell-core" }
-rs-shell-config = { path = "../rs-shell-config" }
-tokio           = { workspace = true }
-serde           = { workspace = true }
-serde_json      = { workspace = true }
-chrono          = { workspace = true }
-rusqlite        = { workspace = true }
-anyhow          = { workspace = true }
-tracing         = { workspace = true }
-tracing-subscriber = { workspace = true }
-blake3          = "1"
-infer           = "0.16"
 
-[dev-dependencies]
-tempfile = "3"
+rs-shell-core = { path = "../rs-shell-core" }
+rs-shell-config = { path = "../rs-shell-config" }
+
+# IPC
+tokio          = { workspace = true }
+anyhow         = { workspace = true }
+serde          = { workspace = true }
+serde_json     = { workspace = true }
+tracing        = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Storage
+rusqlite       = { workspace = true }
+chrono         = { workspace = true }
+
+# Wayland clipboard (wlr-data-control)
+wayland-client = { workspace = true }
+wayland-protocols-wlr = { workspace = true }
+
+# System
+libc = { workspace = true }

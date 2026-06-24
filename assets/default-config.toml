@@ -1,5 +1,6 @@
 # Default sone-papdi configuration.
-# All values are optional; missing keys inherit from this file.
+# This file is bundled at compile time; users may override settings
+# in ~/.config/rs-shell/config.toml. Missing keys inherit from defaults.
 
 # ── General ─────────────────────────────────────────────────
 [general]
@@ -95,7 +96,7 @@ font = "Inter 11"
 
 [theme.colors]
 # All optional — missing keys inherit from the named theme
-accent = "#7dcfff"
+accent    = "#7dcfff"
 accent_text = "#1a1b26"
 
 # ── Lock Screen ─────────────────────────────────────────────
@@ -105,6 +106,7 @@ blur_background = true
 
 # ── Keybinds (shell-level, not WM-level) ────────────────────
 [keybinds]
+# These are registered via wlr-keyboard-shortcuts-inhibit or the WM IPC
 show_launcher      = "Super+Space"
 show_clipboard     = "Super+V"
 show_notifications = "Super+N"

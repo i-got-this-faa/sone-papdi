@@ -20,7 +20,7 @@ pub fn search(apps: &[AppEntry], query: &str, max_results: usize) -> Vec<ScoredE
         })
         .collect();
 
-    results.sort_by(|a, b| b.score.cmp(&a.score));
+    results.sort_by_key(|b| std::cmp::Reverse(b.score));
     results.into_iter().take(max_results).collect()
 }
 

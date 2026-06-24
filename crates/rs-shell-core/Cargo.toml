@@ -7,12 +7,13 @@ authors.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-tokio         = { workspace = true }
+
 serde         = { workspace = true }
 serde_json    = { workspace = true }
-chrono        = { workspace = true }
-futures       = { workspace = true }
-tokio-stream  = { workspace = true, features = ["sync"] }
+tokio         = { workspace = true }
 anyhow        = { workspace = true }
-dirs-next     = { workspace = true }
+chrono        = { workspace = true }
 libc          = { workspace = true }
+futures       = { workspace = true }
+tokio-stream  = { workspace = true }
+dirs-next    = { workspace = true }

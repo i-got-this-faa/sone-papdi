@@ -48,26 +48,43 @@ pub fn config_dir() -> PathBuf {
 mod tests {
     use super::*;
 
+    /// Run a test with a temporary XDG_RUNTIME_DIR value, restoring the original after.
+    fn with_runtime_dir<T>(val: Option<&str>, f: impl FnOnce() -> T) -> T {
+        let prev = std::env::var("XDG_RUNTIME_DIR").ok();
+        match val {
+            Some(v) => std::env::set_var("XDG_RUNTIME_DIR", v),
+            None => std::env::remove_var("XDG_RUNTIME_DIR"),
+        }
+        let result = f();
+        match prev {
+            Some(v) => std::env::set_var("XDG_RUNTIME_DIR", v),
+            None => std::env::remove_var("XDG_RUNTIME_DIR"),
+        }
+        result
+    }
+
     #[test]
     fn runtime_dir_under_run_user() {
-        std::env::remove_var("XDG_RUNTIME_DIR");
-        let path = runtime_dir();
-        assert!(path.to_string_lossy().starts_with("/run/user/"));
+        with_runtime_dir(None, || {
+            let path = runtime_dir();
+            assert!(path.to_string_lossy().starts_with("/run/user/"));
+        });
     }
 
     #[test]
     fn sockets_are_in_runtime_dir() {
-        std::env::remove_var("XDG_RUNTIME_DIR");
-        let rt = runtime_dir();
-        assert_eq!(daemon_socket(), rt.join("rs-shell.sock"));
-        assert_eq!(clipboard_socket(), rt.join("rs-shell-clipboard.sock"));
-        assert_eq!(bar_socket(), rt.join("rs-shell-bar.sock"));
+        with_runtime_dir(None, || {
+            let rt = runtime_dir();
+            assert_eq!(daemon_socket(), rt.join("rs-shell.sock"));
+            assert_eq!(clipboard_socket(), rt.join("rs-shell-clipboard.sock"));
+            assert_eq!(bar_socket(), rt.join("rs-shell-bar.sock"));
+        });
     }
 
     #[test]
     fn xdg_runtime_dir_respected() {
-        std::env::set_var("XDG_RUNTIME_DIR", "/tmp/custom-runtime");
-        assert_eq!(runtime_dir(), PathBuf::from("/tmp/custom-runtime"));
-        std::env::remove_var("XDG_RUNTIME_DIR");
+        with_runtime_dir(Some("/tmp/custom-runtime"), || {
+            assert_eq!(runtime_dir(), PathBuf::from("/tmp/custom-runtime"));
+        });
     }
 }
