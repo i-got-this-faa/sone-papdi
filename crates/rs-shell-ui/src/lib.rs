@@ -1,4 +1,3 @@
-//! Shared GTK4 UI components and layer-shell helpers for sone-papdi.
+//! Shared GTK4 layer-shell UI components and launcher for sone-papdi.
 
-/// Placeholder for the UI crate scaffold.
-pub fn placeholder() {}
+pub mod launcher;

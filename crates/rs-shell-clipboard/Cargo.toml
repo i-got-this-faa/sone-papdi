@@ -11,3 +11,18 @@ name = "rs-shell-clipd"
 path = "src/main.rs"
 
 [dependencies]
+rs-shell-core   = { path = "../rs-shell-core" }
+rs-shell-config = { path = "../rs-shell-config" }
+tokio           = { workspace = true }
+serde           = { workspace = true }
+serde_json      = { workspace = true }
+chrono          = { workspace = true }
+rusqlite        = { workspace = true }
+anyhow          = { workspace = true }
+tracing         = { workspace = true }
+tracing-subscriber = { workspace = true }
+blake3          = "1"
+infer           = "0.16"
+
+[dev-dependencies]
+tempfile = "3"

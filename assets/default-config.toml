@@ -1,8 +1,112 @@
 # Default sone-papdi configuration.
-# This is a placeholder; the full schema will be implemented in the config subplan.
+# All values are optional; missing keys inherit from this file.
 
+# ── General ─────────────────────────────────────────────────
 [general]
-wm = "auto"
-terminal = "foot"
+wm = "auto"              # "hyprland" | "sway" | "niri" | "river" | "auto"
+terminal = "foot"        # fallback terminal
 file_manager = "thunar"
 browser = "firefox"
+
+# ── Bar / Panel ─────────────────────────────────────────────
+[bar]
+position = "top"         # "top" | "bottom"
+height = 32
+opacity = 0.92
+font = "JetBrains Mono 10"
+exclusive_zone = true    # reserve screen space
+
+[bar.left]
+modules = ["workspaces", "window-title"]
+
+[bar.center]
+modules = ["clock"]
+
+[bar.right]
+modules = ["systray", "audio", "network", "battery", "notifications"]
+
+[bar.clock]
+format = "%a %d %b  %H:%M"
+
+# ── Clipboard ───────────────────────────────────────────────
+[clipboard]
+max_entries = 5000
+max_text_bytes = 1048576
+max_image_bytes = 10485760
+dedupe = true
+cleanup_unpinned_after_days = 30
+auto_paste = true
+paste_delay_ms = 140
+paste_method = "wtype"   # "wtype" | "ydotool" | "xdotool"
+favicon_cache = true
+
+[clipboard.ui]
+window_width = 920
+window_height = 620
+background_opacity = 0.70
+preview_default = true
+
+# ── Launcher ────────────────────────────────────────────────
+[launcher]
+width = 600
+max_results = 12
+show_icons = true
+fuzzy = true
+terminal_prefix = "foot -e"  # prefix for terminal apps
+
+# ── Notifications ───────────────────────────────────────────
+[notifications]
+timeout_ms = 5000
+timeout_critical_ms = 0   # 0 = never auto-dismiss
+max_visible = 5
+position = "top-right"    # "top-right" | "top-left" | "bottom-right" | "bottom-left"
+gap = 8
+width = 360
+
+# ── Battery ─────────────────────────────────────────────────
+[battery]
+warn_level = 20.0
+critical_level = 5.0
+device = "auto"           # "auto" | specific UPower path
+
+# ── Audio ───────────────────────────────────────────────────
+[audio]
+backend = "auto"          # "pipewire" | "pulseaudio" | "auto"
+max_volume = 150          # max percent (100 or 150)
+scroll_step = 5           # volume step on scroll
+
+# ── Network ─────────────────────────────────────────────────
+[network]
+primary_interface = "auto"
+
+# ── Wallpaper ───────────────────────────────────────────────
+[wallpaper]
+path = "~/.config/rs-shell/wallpaper.jpg"
+mode = "fill"             # "fill" | "fit" | "center" | "tile"
+backend = "internal"      # "internal" | "swww" | "swaybg" | "hyprpaper"
+
+# ── Theme ───────────────────────────────────────────────────
+[theme]
+name = "nonchalant-dark"  # matches rsclip default
+dark_mode = true
+icon_theme = "Papirus-Dark"
+gtk_theme = "adw-gtk3-dark"
+font = "Inter 11"
+
+[theme.colors]
+# All optional — missing keys inherit from the named theme
+accent = "#7dcfff"
+accent_text = "#1a1b26"
+
+# ── Lock Screen ─────────────────────────────────────────────
+[lockscreen]
+command = "swaylock"      # external, rs-shell calls it
+blur_background = true
+
+# ── Keybinds (shell-level, not WM-level) ────────────────────
+[keybinds]
+show_launcher      = "Super+Space"
+show_clipboard     = "Super+V"
+show_notifications = "Super+N"
+screenshot         = "Print"
+lock               = "Super+L"

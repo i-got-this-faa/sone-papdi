@@ -7,3 +7,14 @@ authors.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+rs-shell-core   = { path = "../rs-shell-core" }
+rs-shell-config = { path = "../rs-shell-config" }
+rs-shell-clipboard = { path = "../rs-shell-clipboard" }
+rs-shell-ui     = { path = "../rs-shell-ui" }
+tokio           = { workspace = true }
+zbus            = { workspace = true }
+serde           = { workspace = true }
+serde_json      = { workspace = true }
+tracing         = { workspace = true }
+anyhow          = { workspace = true }
+futures         = { workspace = true }
