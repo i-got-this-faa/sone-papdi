@@ -17,4 +17,3 @@
 
 pub mod dbus_server;
 pub mod hyprwire_server;
-pub mod unix_server;
