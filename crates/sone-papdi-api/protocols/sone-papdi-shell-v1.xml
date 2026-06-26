@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="sone_papdi_shell_v1" version="1">
+  <copyright>
+    SPDX-License-Identifier: MIT
+  </copyright>
+
+  <object name="shell_manager_v1" version="1">
+    <description>
+      Manager object for sone-papdi shell IPC. A client binds this protocol
+      to subscribe to shell events, send commands, and receive responses.
+    </description>
+
+    <!-- Client → Server requests -->
+    <c2s name="subscribe" since="1">
+      <description>Subscribe to a single event topic.</description>
+      <arg name="topic" type="varchar" />
+    </c2s>
+
+    <c2s name="unsubscribe" since="1">
+      <description>Unsubscribe from an event topic.</description>
+      <arg name="topic" type="varchar" />
+    </c2s>
+
+    <c2s name="command" since="1">
+      <description>Send an imperative command (serialized JSON).</description>
+      <arg name="payload" type="varchar" />
+    </c2s>
+
+    <c2s name="ping" since="1">
+      <description>Keepalive ping.</description>
+    </c2s>
+
+    <!-- Server → Client events -->
+    <s2c name="event" since="1">
+      <description>A shell event matching a subscribed topic.</description>
+      <arg name="topic" type="varchar" />
+      <arg name="payload" type="varchar" />
+    </s2c>
+
+    <s2c name="response" since="1">
+      <description>Response to a prior command request.</description>
+      <arg name="payload" type="varchar" />
+    </s2c>
+
+    <s2c name="pong" since="1">
+      <description>Response to a ping.</description>
+    </s2c>
+  </object>
+</protocol>

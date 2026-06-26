@@ -8,7 +8,7 @@
 
 ## Scope
 
-- `crates/rs-shell-ui/src/launcher.rs` (or separate `crates/rs-shell-launcher/`).
+- `crates/sone-papdi-ui/src/launcher.rs` (or separate `crates/sone-papdi-launcher/`).
 - `.desktop` file indexing across `XDG_DATA_DIRS/applications`.
 - Fuzzy search scoring.
 - GTK4 `GtkListView` virtual scrolling.
@@ -50,14 +50,14 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-ui  # or rs-shell-launcher if split
-cargo test -p rs-shell-ui launcher
-cargo clippy -p rs-shell-ui -- -D warnings
+cargo build -p sone-papdi-ui  # or sone-papdi-launcher if split
+cargo test -p sone-papdi-ui launcher
+cargo clippy -p sone-papdi-ui -- -D warnings
 ```
 
 ## Notes / Risks
 
-- If launcher becomes large, consider splitting into its own crate `rs-shell-launcher`.
+- If launcher becomes large, consider splitting into its own crate `sone-papdi-launcher`.
 - `.desktop` parsing can be complex; a minimal parser is fine for MVP.
 - Icon theme resolution may need `gtk4::IconTheme`.
 - Launching apps inside Flatpak/snaps requires special handling; defer.

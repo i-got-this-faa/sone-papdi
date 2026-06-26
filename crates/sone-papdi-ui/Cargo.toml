@@ -1,0 +1,21 @@
+[package]
+name = "sone-papdi-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+sone-papdi-core   = { path = "../sone-papdi-core" }
+sone-papdi-config = { path = "../sone-papdi-config" }
+gtk4            = { workspace = true }
+glib            = { workspace = true }
+freedesktop-desktop-entry = { workspace = true }
+serde           = { workspace = true }
+anyhow          = { workspace = true }
+tracing         = { workspace = true }
+tokio           = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

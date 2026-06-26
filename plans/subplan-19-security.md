@@ -8,8 +8,8 @@
 
 ## Scope
 
-- `crates/rs-shell-core/src/ipc.rs` socket permissions.
-- Secret clipboard encryption in `rs-shell-clipboard`.
+- `crates/sone-papdi-core/src/ipc.rs` socket permissions.
+- Secret clipboard encryption in `sone-papdi-clipboard`.
 - IPC command allowlist and rate limiting.
 - Systemd unit hardening.
 - Documentation of threat model.
@@ -51,10 +51,10 @@
 ## Verification
 
 ```bash
-cargo test -p rs-shell-core socket_perms
-cargo test -p rs-shell-clipboard secret_encrypt
-cargo test -p rs-shell-api rate_limit
-cargo build -p rs-shell-daemon
+cargo test -p sone-papdi-core socket_perms
+cargo test -p sone-papdi-clipboard secret_encrypt
+cargo test -p sone-papdi-api rate_limit
+cargo build -p sone-papdi-daemon
 ```
 
 ## Notes / Risks
@@ -62,4 +62,4 @@ cargo build -p rs-shell-daemon
 - libsecret/keyring availability varies; provide fallback to file-backed key with restricted permissions.
 - Encryption adds dependencies (`ring`, `aes-gcm`, or `rustcrypto` crates).
 - Rate limiting must not block legitimate rapid commands.
-- Systemd hardening must still allow required paths (`~/.config/rs-shell`, `~/.local/share/rs-shell`, `/run/user/<uid>`).
+- Systemd hardening must still allow required paths (`~/.config/sone-papdi`, `~/.local/share/sone-papdi`, `/run/user/<uid>`).

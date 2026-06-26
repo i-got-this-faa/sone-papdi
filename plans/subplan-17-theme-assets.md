@@ -2,7 +2,7 @@
 
 **Goal:** Provide the bundled CSS themes and fallback icons referenced by the theme service and UI crates.
 
-**Target deliverable:** `assets/themes/*.css` files exist and are loadable by `rs-shell-ui`; the default theme matches `nonchalant-dark`.
+**Target deliverable:** `assets/themes/*.css` files exist and are loadable by `sone-papdi-ui`; the default theme matches `nonchalant-dark`.
 
 ---
 
@@ -45,14 +45,14 @@
 - [ ] Create `assets/themes/gruvbox-dark.css`.
 - [ ] Create `assets/themes/rose-pine.css`.
 - [ ] Add fallback icons to `assets/icons/`.
-- [ ] Ensure themes are referenced by `rs-shell-services` and `rs-shell-ui`.
+- [ ] Ensure themes are referenced by `sone-papdi-services` and `sone-papdi-ui`.
 - [ ] Add a CSS lint step or GTK smoke load.
 
 ## Verification
 
 ```bash
-cargo build -p rs-shell-services
-cargo build -p rs-shell-ui
+cargo build -p sone-papdi-services
+cargo build -p sone-papdi-ui
 # Manual: run a small GTK program loading each theme
 ```
 

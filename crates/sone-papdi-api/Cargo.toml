@@ -1,0 +1,28 @@
+[package]
+name = "sone-papdi-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "sone-papdi"
+path = "src/bin/sone-papdi.rs"
+
+[dependencies]
+sone-papdi-core   = { path = "../sone-papdi-core" }
+sone-papdi-config = { path = "../sone-papdi-config" }
+tokio           = { workspace = true, features = ["full"] }
+zbus            = { workspace = true }
+serde           = { workspace = true }
+serde_json      = { workspace = true }
+tracing         = { workspace = true }
+anyhow          = { workspace = true }
+futures         = { workspace = true }
+clap            = { workspace = true }
+parking_lot     = { workspace = true }
+hyprwire = "0.4.3"
+
+[build-dependencies]
+hyprwire-scanner = "0.4.3"

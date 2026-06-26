@@ -1,6 +1,6 @@
 # Default sone-papdi configuration.
 # This file is bundled at compile time; users may override settings
-# in ~/.config/rs-shell/config.toml. Missing keys inherit from defaults.
+# in ~/.config/sone-papdi/config.toml. Missing keys inherit from defaults.
 
 # ── General ─────────────────────────────────────────────────
 [general]
@@ -82,7 +82,7 @@ primary_interface = "auto"
 
 # ── Wallpaper ───────────────────────────────────────────────
 [wallpaper]
-path = "~/.config/rs-shell/wallpaper.jpg"
+path = "~/.config/sone-papdi/wallpaper.jpg"
 mode = "fill"             # "fill" | "fit" | "center" | "tile"
 backend = "internal"      # "internal" | "swww" | "swaybg" | "hyprpaper"
 
@@ -101,7 +101,7 @@ accent_text = "#1a1b26"
 
 # ── Lock Screen ─────────────────────────────────────────────
 [lockscreen]
-command = "swaylock"      # external, rs-shell calls it
+command = "swaylock"      # external, sone-papdi calls it
 blur_background = true
 
 # ── Keybinds (shell-level, not WM-level) ────────────────────

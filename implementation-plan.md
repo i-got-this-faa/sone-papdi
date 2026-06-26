@@ -1,10 +1,10 @@
-# rs-shell — Complete Wayland Desktop Shell
+# sone-papdi — Complete Wayland Desktop Shell
 ## Super-Detailed Implementation Plan
 
 > **Baseline**: rsclip v0.1.11 — daemon/UI split, GTK4 layer-shell, SQLite, Unix datagram
-> socket IPC, TOML hot-reload. Every architectural decision in rs-shell extends that foundation.
+> socket IPC, TOML hot-reload. Every architectural decision in sone-papdi extends that foundation.
 >
-> **GTK note**: rsclip uses GTK4. rs-shell uses GTK4 throughout.
+> **GTK note**: rsclip uses GTK4. sone-papdi uses GTK4 throughout.
 > GTK3 on Wayland is a regression — no GPU compositing, no fractional scaling, and
 > `gtk-layer-shell` (GTK3) is effectively unmaintained compared to `gtk4-layer-shell`.
 
@@ -15,14 +15,14 @@
 1. [Design Philosophy](#1-design-philosophy)
 2. [Workspace Layout](#2-workspace-layout)
 3. [Crate Catalogue](#3-crate-catalogue)
-4. [Core IPC & Event Bus (`rs-shell-core`)](#4-core-ipc--event-bus-rs-shell-core)
-5. [Configuration Engine (`rs-shell-config`)](#5-configuration-engine-rs-shell-config)
-6. [Clipboard Engine (`rs-shell-clipboard`)](#6-clipboard-engine-rs-shell-clipboard)
-7. [Subscribable API (`rs-shell-api`)](#7-subscribable-api-rs-shell-api)
-8. [Window Manager Bridge (`rs-shell-wm`)](#8-window-manager-bridge-rs-shell-wm)
-9. [Service Layer (`rs-shell-services`)](#9-service-layer-rs-shell-services)
-10. [UI Layer (`rs-shell-ui`)](#10-ui-layer-rs-shell-ui)
-11. [Shell Daemon (`rs-shell-daemon`)](#11-shell-daemon-rs-shell-daemon)
+4. [Core IPC & Event Bus (`sone-papdi-core`)](#4-core-ipc--event-bus-sone-papdi-core)
+5. [Configuration Engine (`sone-papdi-config`)](#5-configuration-engine-sone-papdi-config)
+6. [Clipboard Engine (`sone-papdi-clipboard`)](#6-clipboard-engine-sone-papdi-clipboard)
+7. [Subscribable API (`sone-papdi-api`)](#7-subscribable-api-sone-papdi-api)
+8. [Window Manager Bridge (`sone-papdi-wm`)](#8-window-manager-bridge-sone-papdi-wm)
+9. [Service Layer (`sone-papdi-services`)](#9-service-layer-sone-papdi-services)
+10. [UI Layer (`sone-papdi-ui`)](#10-ui-layer-sone-papdi-ui)
+11. [Shell Daemon (`sone-papdi-daemon`)](#11-shell-daemon-sone-papdi-daemon)
 12. [Theme System](#12-theme-system)
 13. [Security Model](#13-security-model)
 14. [Performance Architecture](#14-performance-architecture)
@@ -46,11 +46,11 @@
 | **WM-agnostic core** | Core works on any `wlr-foreign-toplevel` compositor; per-WM adapters are plug-ins |
 | **Batteries included** | Every service ships a sane default; zero config required to get a working desktop |
 
-### What rs-shell Provides Out of the Box
+### What sone-papdi Provides Out of the Box
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         rs-shell                            │
+│                         sone-papdi                            │
 │                                                             │
 │  ┌──────────┐  ┌────────────┐  ┌──────────────────────────┐│
 │  │  Panel   │  │  Launcher  │  │  Notification Center     ││
@@ -77,21 +77,21 @@
 ## 2. Workspace Layout
 
 ```
-rs-shell/
+sone-papdi/
 ├── Cargo.toml                   # workspace manifest + shared deps
 ├── Cargo.lock
 ├── xtask/                       # build automation (cargo xtask)
 │   └── src/main.rs
 ├── crates/                      # flat crate layout (rust-analyzer style)
-│   ├── rs-shell-core/           # shared types, IPC primitives, event bus
-│   ├── rs-shell-config/         # TOML config + hot-reload engine
-│   ├── rs-shell-clipboard/      # rsclip-based clipboard engine
-│   ├── rs-shell-api/            # subscribable API server (Unix + D-Bus)
-│   ├── rs-shell-wm/             # WM bridge: wlr-toplevel + per-WM adapters
-│   ├── rs-shell-services/       # Battery, Network, Audio, Wireless, Wallpaper, Theme
-│   ├── rs-shell-ui/             # GTK4 UI components (layer-shell surfaces)
-│   ├── rs-shell-daemon/         # orchestrator binary: starts all services
-│   └── rs-shell-bar/            # panel binary (separate process for isolation)
+│   ├── sone-papdi-core/           # shared types, IPC primitives, event bus
+│   ├── sone-papdi-config/         # TOML config + hot-reload engine
+│   ├── sone-papdi-clipboard/      # rsclip-based clipboard engine
+│   ├── sone-papdi-api/            # subscribable API server (Unix + D-Bus)
+│   ├── sone-papdi-wm/             # WM bridge: wlr-toplevel + per-WM adapters
+│   ├── sone-papdi-services/       # Battery, Network, Audio, Wireless, Wallpaper, Theme
+│   ├── sone-papdi-ui/             # GTK4 UI components (layer-shell surfaces)
+│   ├── sone-papdi-daemon/         # orchestrator binary: starts all services
+│   └── sone-papdi-bar/            # panel binary (separate process for isolation)
 ├── assets/
 │   ├── themes/                  # bundled themes (.css)
 │   ├── icons/                   # fallback icons
@@ -112,22 +112,22 @@ rs-shell/
 resolver = "2"
 members = [
     "xtask",
-    "crates/rs-shell-core",
-    "crates/rs-shell-config",
-    "crates/rs-shell-clipboard",
-    "crates/rs-shell-api",
-    "crates/rs-shell-wm",
-    "crates/rs-shell-services",
-    "crates/rs-shell-ui",
-    "crates/rs-shell-daemon",
-    "crates/rs-shell-bar",
+    "crates/sone-papdi-core",
+    "crates/sone-papdi-config",
+    "crates/sone-papdi-clipboard",
+    "crates/sone-papdi-api",
+    "crates/sone-papdi-wm",
+    "crates/sone-papdi-services",
+    "crates/sone-papdi-ui",
+    "crates/sone-papdi-daemon",
+    "crates/sone-papdi-bar",
 ]
 
 [workspace.package]
 version   = "0.1.0"
 edition   = "2021"
 license   = "MIT"
-authors   = ["rs-shell contributors"]
+authors   = ["sone-papdi contributors"]
 rust-version = "1.80"
 
 [workspace.dependencies]
@@ -193,19 +193,19 @@ debug         = 1
 
 | Crate | Binary? | Purpose |
 |-------|---------|---------|
-| `rs-shell-core` | lib | Shared event types, IPC protocol, error types |
-| `rs-shell-config` | lib | Config schema, file watcher, hot-reload broadcast |
-| `rs-shell-clipboard` | lib + `rsclipd` bin | rsclip clipboard daemon extended for shell |
-| `rs-shell-api` | lib | Subscribable API: Unix socket server + D-Bus server |
-| `rs-shell-wm` | lib | WM bridge: wlr-toplevel, Hyprland/sway/niri adapters |
-| `rs-shell-services` | lib | All system services (Battery, Network, Audio…) |
-| `rs-shell-ui` | lib | GTK4 components: panel widgets, launcher, notif OSD |
-| `rs-shell-daemon` | `rs-shelld` bin | Orchestrator: spawns services, hosts API |
-| `rs-shell-bar` | `rs-shell-bar` bin | Panel process with GTK4 + layer-shell |
+| `sone-papdi-core` | lib | Shared event types, IPC protocol, error types |
+| `sone-papdi-config` | lib | Config schema, file watcher, hot-reload broadcast |
+| `sone-papdi-clipboard` | lib + `rsclipd` bin | rsclip clipboard daemon extended for shell |
+| `sone-papdi-api` | lib | Subscribable API: Unix socket server + D-Bus server |
+| `sone-papdi-wm` | lib | WM bridge: wlr-toplevel, Hyprland/sway/niri adapters |
+| `sone-papdi-services` | lib | All system services (Battery, Network, Audio…) |
+| `sone-papdi-ui` | lib | GTK4 components: panel widgets, launcher, notif OSD |
+| `sone-papdi-daemon` | `rs-shelld` bin | Orchestrator: spawns services, hosts API |
+| `sone-papdi-bar` | `sone-papdi-bar` bin | Panel process with GTK4 + layer-shell |
 
 ---
 
-## 4. Core IPC & Event Bus (`rs-shell-core`)
+## 4. Core IPC & Event Bus (`sone-papdi-core`)
 
 This crate is the nervous system. Every other crate depends on it. It defines the
 canonical event types and IPC primitives.
@@ -213,7 +213,7 @@ canonical event types and IPC primitives.
 ### 4.1 Event Type Hierarchy
 
 ```rust
-// crates/rs-shell-core/src/events.rs
+// crates/sone-papdi-core/src/events.rs
 
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
@@ -429,7 +429,7 @@ pub enum ShellLifecycleEvent {
 ### 4.2 In-Process Event Bus
 
 ```rust
-// crates/rs-shell-core/src/bus.rs
+// crates/sone-papdi-core/src/bus.rs
 
 use tokio::sync::broadcast;
 use crate::events::ShellEvent;
@@ -488,7 +488,7 @@ All cross-process communication uses a length-prefixed JSON frame:
 ```
 
 ```rust
-// crates/rs-shell-core/src/ipc.rs
+// crates/sone-papdi-core/src/ipc.rs
 
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -575,7 +575,7 @@ pub async fn recv_message(stream: &mut UnixStream) -> Result<IpcMessage> {
 ### 4.4 Socket Paths (XDG-compliant)
 
 ```rust
-// crates/rs-shell-core/src/paths.rs
+// crates/sone-papdi-core/src/paths.rs
 
 use std::path::PathBuf;
 
@@ -586,30 +586,30 @@ pub fn runtime_dir() -> PathBuf {
 
 /// Main daemon socket (subscribable API)
 pub fn daemon_socket() -> PathBuf {
-    runtime_dir().join("rs-shell.sock")
+    runtime_dir().join("sone-papdi.sock")
 }
 
 /// Clipboard daemon socket (rsclip compatibility)
 pub fn clipboard_socket() -> PathBuf {
-    runtime_dir().join("rs-shell-clipboard.sock")
+    runtime_dir().join("sone-papdi-clipboard.sock")
 }
 
 /// Bar process activation socket
 pub fn bar_socket() -> PathBuf {
-    runtime_dir().join("rs-shell-bar.sock")
+    runtime_dir().join("sone-papdi-bar.sock")
 }
 ```
 
 ---
 
-## 5. Configuration Engine (`rs-shell-config`)
+## 5. Configuration Engine (`sone-papdi-config`)
 
-Single config file at `~/.config/rs-shell/config.toml`, hot-reloaded by all processes.
+Single config file at `~/.config/sone-papdi/config.toml`, hot-reloaded by all processes.
 
 ### 5.1 Config Schema
 
 ```toml
-# ~/.config/rs-shell/config.toml
+# ~/.config/sone-papdi/config.toml
 
 # ── General ─────────────────────────────────────────────────
 [general]
@@ -691,7 +691,7 @@ primary_interface = "auto"
 
 # ── Wallpaper ───────────────────────────────────────────────
 [wallpaper]
-path = "~/.config/rs-shell/wallpaper.jpg"
+path = "~/.config/sone-papdi/wallpaper.jpg"
 mode = "fill"             # "fill" | "fit" | "center" | "tile"
 backend = "internal"      # "internal" | "swww" | "swaybg" | "hyprpaper"
 
@@ -710,7 +710,7 @@ accent_text = "#1a1b26"
 
 # ── Lock Screen ─────────────────────────────────────────────
 [lockscreen]
-command = "swaylock"      # external, rs-shell calls it
+command = "swaylock"      # external, sone-papdi calls it
 blur_background = true
 
 # ── Keybinds (shell-level, not WM-level) ────────────────────
@@ -726,7 +726,7 @@ lock               = "Super+L"
 ### 5.2 Hot-Reload Engine
 
 ```rust
-// crates/rs-shell-config/src/lib.rs
+// crates/sone-papdi-config/src/lib.rs
 
 use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::PathBuf;
@@ -840,19 +840,19 @@ async fn load_config(path: &PathBuf) -> Result<ShellConfig> {
 
 fn config_path() -> PathBuf {
     let home = std::env::var("HOME").unwrap_or_else(|_| "/root".to_string());
-    PathBuf::from(home).join(".config/rs-shell/config.toml")
+    PathBuf::from(home).join(".config/sone-papdi/config.toml")
 }
 ```
 
 ---
 
-## 6. Clipboard Engine (`rs-shell-clipboard`)
+## 6. Clipboard Engine (`sone-papdi-clipboard`)
 
 This is rsclip with the rough edges sanded for shell integration. Key changes:
 
 1. Emits typed `ClipboardEvent` into the shell event bus
 2. Accepts `ShellCommand::Clipboard*` over the shared IPC socket
-3. Config read from `[clipboard]` section of `rs-shell/config.toml`
+3. Config read from `[clipboard]` section of `sone-papdi/config.toml`
 4. Same SQLite schema + wl-paste watchers as rsclip
 
 ### Clipboard Event Types
@@ -884,20 +884,20 @@ pub enum ClipEntryKind { Text, Link, Color, Image, File, Secret }
         │ wl-paste --watch
         │
         ▼
-[SQLite (XDG_DATA_HOME/rs-shell/clipboard.db)]
+[SQLite (XDG_DATA_HOME/sone-papdi/clipboard.db)]
         │
         │ Unix datagram socket notification
         ▼
 [Shell Event Bus] ──broadcast──► [Bar widgets, Clipboard UI, API subscribers]
 ```
 
-The `rsclipd` binary is renamed `rs-shell-clipd` and the socket path is unified under the
-shell runtime dir. The GTK4 overlay UI becomes `rs-shell-clipboard-ui` and subscribes to
+The `rsclipd` binary is renamed `sone-papdi-clipd` and the socket path is unified under the
+shell runtime dir. The GTK4 overlay UI becomes `sone-papdi-clipboard-ui` and subscribes to
 the shared event bus instead of its own socket.
 
 ---
 
-## 7. Subscribable API (`rs-shell-api`)
+## 7. Subscribable API (`sone-papdi-api`)
 
 External tools (scripts, status bar plugins, custom widgets, CLI) subscribe to typed
 shell events over two interfaces: a Unix socket and D-Bus.
@@ -908,7 +908,7 @@ Clients connect, send a `Subscribe` message with a list of topics, then receive
 a stream of matching `Event` messages.
 
 ```rust
-// crates/rs-shell-api/src/unix_server.rs
+// crates/sone-papdi-api/src/unix_server.rs
 
 use tokio::net::{UnixListener, UnixStream};
 use std::collections::HashSet;
@@ -978,26 +978,26 @@ fn event_topic(event: &rs_shell_core::events::ShellEvent) -> &'static str {
 }
 ```
 
-### 7.2 CLI Client (`rs-shell` binary, built from `rs-shell-daemon`)
+### 7.2 CLI Client (`sone-papdi` binary, built from `sone-papdi-daemon`)
 
 ```
 # One-shot query
-rs-shell battery
-rs-shell audio volume
-rs-shell network status
+sone-papdi battery
+sone-papdi audio volume
+sone-papdi network status
 
 # Subscribe to events (streaming JSON to stdout)
-rs-shell subscribe battery network
-rs-shell subscribe '*'
+sone-papdi subscribe battery network
+sone-papdi subscribe '*'
 
 # Commands
-rs-shell set-volume 70
-rs-shell toggle-mute
-rs-shell set-wallpaper ~/Pictures/bg.jpg
-rs-shell set-theme catppuccin-mocha
-rs-shell switch-workspace 2
-rs-shell show-launcher
-rs-shell lock
+sone-papdi set-volume 70
+sone-papdi toggle-mute
+sone-papdi set-wallpaper ~/Pictures/bg.jpg
+sone-papdi set-theme catppuccin-mocha
+sone-papdi switch-workspace 2
+sone-papdi show-launcher
+sone-papdi lock
 ```
 
 ### 7.3 D-Bus Interface
@@ -1005,7 +1005,7 @@ rs-shell lock
 Using `zbus`, the daemon exports `org.rs_shell.Shell1` on the session bus.
 
 ```rust
-// crates/rs-shell-api/src/dbus_server.rs
+// crates/sone-papdi-api/src/dbus_server.rs
 
 use zbus::{interface, Connection};
 
@@ -1092,14 +1092,14 @@ pub async fn run_dbus_bridge(bus: EventBus, conn: &Connection) {
 
 ---
 
-## 8. Window Manager Bridge (`rs-shell-wm`)
+## 8. Window Manager Bridge (`sone-papdi-wm`)
 
 A **trait-based plugin** architecture: one common `WmAdapter` trait, multiple implementations.
 
 ### 8.1 The Adapter Trait
 
 ```rust
-// crates/rs-shell-wm/src/adapter.rs
+// crates/sone-papdi-wm/src/adapter.rs
 
 use async_trait::async_trait;
 use rs_shell_core::events::WindowEvent;
@@ -1140,7 +1140,7 @@ pub trait WmAdapter: Send + Sync + 'static {
 Works with any wlroots compositor:
 
 ```rust
-// crates/rs-shell-wm/src/wlr_toplevel.rs
+// crates/sone-papdi-wm/src/wlr_toplevel.rs
 
 use wayland_protocols_wlr::foreign_toplevel::v1::client::{
     zwlr_foreign_toplevel_handle_v1,
@@ -1160,7 +1160,7 @@ use wayland_client::{Connection, Dispatch, QueueHandle};
 Hyprland exposes a Unix socket IPC:
 
 ```rust
-// crates/rs-shell-wm/src/hyprland.rs
+// crates/sone-papdi-wm/src/hyprland.rs
 
 use tokio::net::UnixStream;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -1283,7 +1283,7 @@ pub struct SwayAdapter;
 ### 8.5 Auto-Detection
 
 ```rust
-// crates/rs-shell-wm/src/lib.rs
+// crates/sone-papdi-wm/src/lib.rs
 
 pub fn detect_wm() -> Box<dyn WmAdapter> {
     if std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok() {
@@ -1302,7 +1302,7 @@ pub fn detect_wm() -> Box<dyn WmAdapter> {
 
 ---
 
-## 9. Service Layer (`rs-shell-services`)
+## 9. Service Layer (`sone-papdi-services`)
 
 Each service is a `tokio::task` that polls/subscribes to a system resource and feeds
 typed events into the shared `EventBus`.
@@ -1310,7 +1310,7 @@ typed events into the shared `EventBus`.
 ### 9.1 Battery Service (UPower D-Bus)
 
 ```rust
-// crates/rs-shell-services/src/battery.rs
+// crates/sone-papdi-services/src/battery.rs
 
 use zbus::Connection;
 use rs_shell_core::{bus::EventBus, events::{ShellEvent, BatteryEvent, BatteryState, BatteryStatus}};
@@ -1358,7 +1358,7 @@ pub async fn run(bus: EventBus, config: rs_shell_config::BatteryConfig) -> anyho
 ### 9.2 Network Service (NetworkManager D-Bus)
 
 ```rust
-// crates/rs-shell-services/src/network.rs
+// crates/sone-papdi-services/src/network.rs
 
 // D-Bus: org.freedesktop.NetworkManager
 // Key signals:
@@ -1386,7 +1386,7 @@ pub async fn run(bus: EventBus, _config: rs_shell_config::NetworkConfig) -> anyh
 ### 9.3 Audio Service (PipeWire via pipewire-rs)
 
 ```rust
-// crates/rs-shell-services/src/audio.rs
+// crates/sone-papdi-services/src/audio.rs
 // Dependency: pipewire = "0.8" (Rust bindings for libpipewire)
 //
 // Architecture:
@@ -1437,7 +1437,7 @@ pub async fn run(bus: EventBus, config: rs_shell_config::AudioConfig) -> anyhow:
 Wireless is a specialized view on NetworkManager's WiFi devices:
 
 ```rust
-// crates/rs-shell-services/src/wireless.rs
+// crates/sone-papdi-services/src/wireless.rs
 //
 // Uses org.freedesktop.NetworkManager.Device.Wireless interface:
 //   - PropertiesChanged for ActiveAccessPoint
@@ -1451,10 +1451,10 @@ Wireless is a specialized view on NetworkManager's WiFi devices:
 
 ### 9.5 Notification Service (org.freedesktop.Notifications)
 
-rs-shell implements the full notification server, replacing dunst/mako.
+sone-papdi implements the full notification server, replacing dunst/mako.
 
 ```rust
-// crates/rs-shell-services/src/notifications.rs
+// crates/sone-papdi-services/src/notifications.rs
 
 use zbus::{interface, SignalContext};
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -1538,7 +1538,7 @@ impl NotificationServer {
     }
 
     fn get_server_information(&self) -> (&str, &str, &str, &str) {
-        ("rs-shell", "rs-shell project", env!("CARGO_PKG_VERSION"), "1.2")
+        ("sone-papdi", "sone-papdi project", env!("CARGO_PKG_VERSION"), "1.2")
     }
 
     #[zbus(signal)]
@@ -1567,7 +1567,7 @@ pub async fn run(bus: rs_shell_core::bus::EventBus) -> anyhow::Result<()> {
 ### 9.6 Wallpaper Service
 
 ```rust
-// crates/rs-shell-services/src/wallpaper.rs
+// crates/sone-papdi-services/src/wallpaper.rs
 
 use rs_shell_config::WallpaperConfig;
 use rs_shell_core::events::{ShellEvent, WallpaperEvent};
@@ -1600,7 +1600,7 @@ pub async fn apply(config: &WallpaperConfig, bus: &rs_shell_core::bus::EventBus)
         }
         "internal" | _ => {
             // GTK4 GtkPicture-based rendering on a layer-shell surface at layer BACKGROUND
-            // Launched as a separate lightweight process: rs-shell-wallpaper
+            // Launched as a separate lightweight process: sone-papdi-wallpaper
         }
     }
 
@@ -1616,7 +1616,7 @@ pub async fn apply(config: &WallpaperConfig, bus: &rs_shell_core::bus::EventBus)
 ### 9.7 Theme Service
 
 ```rust
-// crates/rs-shell-services/src/theme.rs
+// crates/sone-papdi-services/src/theme.rs
 
 use rs_shell_config::ThemeConfig;
 use rs_shell_core::events::{ShellEvent, ThemeEvent};
@@ -1641,10 +1641,10 @@ pub struct ThemeManager {
 impl ThemeManager {
     pub async fn apply(&self) -> anyhow::Result<()> {
         let css = self.resolve_css()?;
-        // Write to ~/.config/rs-shell/active-theme.css
+        // Write to ~/.config/sone-papdi/active-theme.css
         let out = dirs_next::config_dir()
             .unwrap()
-            .join("rs-shell/active-theme.css");
+            .join("sone-papdi/active-theme.css");
         tokio::fs::write(&out, &css).await?;
 
         // Set GTK theme via gsettings (affects GTK apps system-wide)
@@ -1671,7 +1671,7 @@ impl ThemeManager {
         // 1. Check user theme dir
         let user_theme = dirs_next::config_dir()
             .unwrap()
-            .join(format!("rs-shell/themes/{}.css", self.config.name));
+            .join(format!("sone-papdi/themes/{}.css", self.config.name));
         if user_theme.exists() {
             return Ok(std::fs::read_to_string(user_theme)?);
         }
@@ -1691,7 +1691,7 @@ impl ThemeManager {
 
 ---
 
-## 10. UI Layer (`rs-shell-ui`)
+## 10. UI Layer (`sone-papdi-ui`)
 
 All UI surfaces use `gtk4-layer-shell` to anchor them to the Wayland compositor layer.
 
@@ -1729,11 +1729,11 @@ All UI surfaces use `gtk4-layer-shell` to anchor them to the Wayland compositor 
 
 ### 10.2 Panel / Bar
 
-The bar is a separate binary (`rs-shell-bar`) for isolation. It opens a
+The bar is a separate binary (`sone-papdi-bar`) for isolation. It opens a
 `gtk4-layer-shell` surface anchored top (or bottom), exclusive zone equal to bar height.
 
 ```rust
-// crates/rs-shell-bar/src/main.rs
+// crates/sone-papdi-bar/src/main.rs
 
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
@@ -1749,7 +1749,7 @@ pub fn build_bar(app: &gtk4::Application, bus_receiver: tokio::sync::broadcast::
     window.set_anchor(Edge::Right,  true);
     window.set_anchor(Edge::Top,    true); // or Bottom
     window.set_exclusive_zone(32);         // bar height from config
-    window.set_namespace("rs-shell-bar");
+    window.set_namespace("sone-papdi-bar");
 
     // CSS
     apply_theme_css(&window);
@@ -1861,12 +1861,12 @@ SystrayWidget        → StatusNotifierItem D-Bus watcher (org.kde.StatusNotifie
 
 ---
 
-## 11. Shell Daemon (`rs-shell-daemon`)
+## 11. Shell Daemon (`sone-papdi-daemon`)
 
 The orchestrator binary `rs-shelld` starts all services and hosts the API.
 
 ```rust
-// crates/rs-shell-daemon/src/main.rs
+// crates/sone-papdi-daemon/src/main.rs
 
 use rs_shell_core::bus::EventBus;
 use rs_shell_config::ConfigManager;
@@ -2003,7 +2003,7 @@ async fn main() -> anyhow::Result<()> {
 ```css
 /* assets/themes/<name>.css */
 
-/* 1. CSS variables (consumed by rs-shell itself) */
+/* 1. CSS variables (consumed by sone-papdi itself) */
 :root {
   --shell-bg:     rgba(22, 22, 30, 0.92);
   --shell-accent: #7dcfff;
@@ -2023,7 +2023,7 @@ async fn main() -> anyhow::Result<()> {
 ### Runtime CSS Application
 
 ```rust
-// crates/rs-shell-ui/src/theme.rs
+// crates/sone-papdi-ui/src/theme.rs
 
 use gtk4::{CssProvider, gdk::Display, StyleContext};
 
@@ -2063,15 +2063,15 @@ rs-shelld (daemon, no UI, no GTK)
 ├── Battery/Network: read-only D-Bus system bus
 ├── Audio: PipeWire client socket
 ├── Notifications: org.freedesktop.Notifications D-Bus name
-└── API: Unix socket at /run/user/UID/rs-shell.sock (mode 0600)
+└── API: Unix socket at /run/user/UID/sone-papdi.sock (mode 0600)
 
-rs-shell-bar (GTK process, no D-Bus system access)
+sone-papdi-bar (GTK process, no D-Bus system access)
 │
 └── Connects to rs-shelld via Unix socket
     Receives events, sends commands only
 
-rs-shell-launcher (spawned on demand, short-lived)
-rs-shell-clipboard-ui (resident but idle)
+sone-papdi-launcher (spawned on demand, short-lived)
+sone-papdi-clipboard-ui (resident but idle)
 ```
 
 ### Clipboard Security
@@ -2093,7 +2093,7 @@ rs-shell-clipboard-ui (resident but idle)
 ```ini
 # packaging/systemd/rs-shelld.service
 [Unit]
-Description=rs-shell Desktop Shell Daemon
+Description=sone-papdi Desktop Shell Daemon
 PartOf=graphical-session.target
 After=graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
@@ -2108,7 +2108,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=%h/.config/rs-shell %h/.local/share/rs-shell /run/user/%U
+ReadWritePaths=%h/.config/sone-papdi %h/.local/share/sone-papdi /run/user/%U
 
 [Install]
 WantedBy=graphical-session.target
@@ -2126,7 +2126,7 @@ t=5ms   Event bus ready, socket created (systemd sd_notify READY=1)
 t=15ms  Battery, Network service D-Bus connections established
 t=20ms  Audio PipeWire connection established
 t=30ms  Notification server D-Bus name acquired
-t=40ms  rs-shell-bar process starts (separate, GTK init)
+t=40ms  sone-papdi-bar process starts (separate, GTK init)
 t=80ms  Bar window visible, first paint
 t=90ms  Wallpaper applied (swaybg/swww launched)
 t=100ms Launcher pre-indexes .desktop files in background thread
@@ -2137,9 +2137,9 @@ t=100ms Launcher pre-indexes .desktop files in background thread
 | Component | Target RSS |
 |-----------|-----------|
 | rs-shelld | < 12 MB |
-| rs-shell-bar | < 25 MB |
-| rs-shell-clipboard-ui (idle) | < 18 MB |
-| rs-shell-launcher (resident) | < 20 MB |
+| sone-papdi-bar | < 25 MB |
+| sone-papdi-clipboard-ui (idle) | < 18 MB |
+| sone-papdi-launcher (resident) | < 20 MB |
 | **Total** | **< 75 MB** |
 
 ### Key Perf Decisions
@@ -2169,24 +2169,24 @@ t=100ms Launcher pre-indexes .desktop files in background thread
 ### Feature Flags
 
 ```toml
-# crates/rs-shell-daemon/Cargo.toml
+# crates/sone-papdi-daemon/Cargo.toml
 [features]
 default    = ["pipewire", "networkmanager"]
-pipewire   = ["rs-shell-services/pipewire"]
-pulseaudio = ["rs-shell-services/pulseaudio"]
-networkmanager = ["rs-shell-services/networkmanager"]
-iwd        = ["rs-shell-services/iwd"]   # alternative wifi backend
-swww       = ["rs-shell-services/swww"]
+pipewire   = ["sone-papdi-services/pipewire"]
+pulseaudio = ["sone-papdi-services/pulseaudio"]
+networkmanager = ["sone-papdi-services/networkmanager"]
+iwd        = ["sone-papdi-services/iwd"]   # alternative wifi backend
+swww       = ["sone-papdi-services/swww"]
 ```
 
 ### AUR Package
 
 ```
-rs-shell-bin
-├── Binaries: rs-shelld, rs-shell-bar, rs-shell-clipboard-ui, rs-shell, rs-shell-launcher
-├── Systemd: rs-shelld.service, rs-shell-bar.service, rs-shell-clipboard.service
-├── Desktop: rs-shell-launcher.desktop
-└── Default config: /usr/share/rs-shell/default-config.toml
+sone-papdi-bin
+├── Binaries: rs-shelld, sone-papdi-bar, sone-papdi-clipboard-ui, sone-papdi, sone-papdi-launcher
+├── Systemd: rs-shelld.service, sone-papdi-bar.service, sone-papdi-clipboard.service
+├── Desktop: sone-papdi-launcher.desktop
+└── Default config: /usr/share/sone-papdi/default-config.toml
 ```
 
 ---
@@ -2195,14 +2195,14 @@ rs-shell-bin
 
 ### Phase 0 — Scaffold (Week 1–2)
 - Workspace setup, all crates skeletons
-- `rs-shell-core`: event types, event bus, IPC protocol, socket paths
-- `rs-shell-config`: schema, hot-reload engine, default config
+- `sone-papdi-core`: event types, event bus, IPC protocol, socket paths
+- `sone-papdi-config`: schema, hot-reload engine, default config
 - `rs-shelld` boots, starts no services, Unix socket accepts connections
 
-**Deliverable**: `rs-shelld` running, `rs-shell subscribe '*'` shows empty stream
+**Deliverable**: `rs-shelld` running, `sone-papdi subscribe '*'` shows empty stream
 
 ### Phase 1 — Clipboard (Week 3–4)
-- Fork rsclip into `crates/rs-shell-clipboard/`
+- Fork rsclip into `crates/sone-papdi-clipboard/`
 - Unify config, socket paths, and event bus integration
 - Clipboard events flow through `ShellEvent::Clipboard`
 - Clipboard UI subscribes via event bus
@@ -2215,17 +2215,17 @@ rs-shell-bin
 - Network (NetworkManager basic connectivity)
 - Audio (PipeWire)
 
-**Deliverable**: `rs-shell subscribe battery audio notification` shows live events
+**Deliverable**: `sone-papdi subscribe battery audio notification` shows live events
 
 ### Phase 3 — WM Bridge (Week 8–9)
 - `wlr-foreign-toplevel` generic adapter
 - Hyprland adapter
 - Window events (open/close/focus/workspace) flowing to bus
 
-**Deliverable**: `rs-shell subscribe window` shows window lifecycle events
+**Deliverable**: `sone-papdi subscribe window` shows window lifecycle events
 
 ### Phase 4 — Bar MVP (Week 10–12)
-- `rs-shell-bar` binary with gtk4-layer-shell
+- `sone-papdi-bar` binary with gtk4-layer-shell
 - Working modules: clock, battery, audio, network, workspaces
 - Theme CSS loading and hot-reload
 - Bar reacts to live service events
@@ -2327,6 +2327,6 @@ libc        = "0.2"        # getuid() for socket paths
 
 ---
 
-*End of rs-shell implementation plan — v0.1 draft*
+*End of sone-papdi implementation plan — v0.1 draft*
 *Designed to extend rsclip's daemon/UI split, TOML hot-reload, and nonchalant-dark CSS*
 *across a full Wayland desktop shell surface area.*

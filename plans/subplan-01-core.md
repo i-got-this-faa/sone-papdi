@@ -8,10 +8,10 @@
 
 ## Scope
 
-- `crates/rs-shell-core/src/events.rs` — `ShellEvent` enum and all payload types.
-- `crates/rs-shell-core/src/bus.rs` — `EventBus` wrapper around `tokio::sync::broadcast`.
-- `crates/rs-shell-core/src/ipc.rs` — length-prefixed JSON frame protocol + `IpcMessage`/`IpcResponse`/`ShellCommand`.
-- `crates/rs-shell-core/src/paths.rs` — XDG runtime dir helpers.
+- `crates/sone-papdi-core/src/events.rs` — `ShellEvent` enum and all payload types.
+- `crates/sone-papdi-core/src/bus.rs` — `EventBus` wrapper around `tokio::sync::broadcast`.
+- `crates/sone-papdi-core/src/ipc.rs` — length-prefixed JSON frame protocol + `IpcMessage`/`IpcResponse`/`ShellCommand`.
+- `crates/sone-papdi-core/src/paths.rs` — XDG runtime dir helpers.
 - Unit tests for serialization, bus filtering, and IPC round-trip.
 
 ## Dependencies
@@ -51,8 +51,8 @@
 ## Verification
 
 ```bash
-cargo test -p rs-shell-core
-cargo clippy -p rs-shell-core -- -D warnings
+cargo test -p sone-papdi-core
+cargo clippy -p sone-papdi-core -- -D warnings
 ```
 
 ## Notes / Risks

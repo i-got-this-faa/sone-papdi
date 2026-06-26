@@ -8,11 +8,11 @@
 
 ## Scope
 
-- `crates/rs-shell-wm/src/adapter.rs` — `WmAdapter` trait.
-- `crates/rs-shell-wm/src/wlr_toplevel.rs` — generic Wayland adapter.
-- `crates/rs-shell-wm/src/hyprland.rs` — Hyprland socket IPC adapter.
-- `crates/rs-shell-wm/src/sway.rs` — sway/i3-compatible IPC adapter.
-- `crates/rs-shell-wm/src/lib.rs` — detection and adapter factory.
+- `crates/sone-papdi-wm/src/adapter.rs` — `WmAdapter` trait.
+- `crates/sone-papdi-wm/src/wlr_toplevel.rs` — generic Wayland adapter.
+- `crates/sone-papdi-wm/src/hyprland.rs` — Hyprland socket IPC adapter.
+- `crates/sone-papdi-wm/src/sway.rs` — sway/i3-compatible IPC adapter.
+- `crates/sone-papdi-wm/src/lib.rs` — detection and adapter factory.
 
 ## Dependencies
 
@@ -48,9 +48,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-wm
-cargo test -p rs-shell-wm
-cargo clippy -p rs-shell-wm -- -D warnings
+cargo build -p sone-papdi-wm
+cargo test -p sone-papdi-wm
+cargo clippy -p sone-papdi-wm -- -D warnings
 ```
 
 ## Notes / Risks

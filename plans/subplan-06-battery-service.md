@@ -8,7 +8,7 @@
 
 ## Scope
 
-- `crates/rs-shell-services/src/battery.rs`.
+- `crates/sone-papdi-services/src/battery.rs`.
 - UPower display device discovery.
 - `zbus` proxy for UPower device.
 - State polling fallback if signals are unreliable.
@@ -45,9 +45,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-services --features default
-cargo test -p rs-shell-services battery
-cargo clippy -p rs-shell-services -- -D warnings
+cargo build -p sone-papdi-services --features default
+cargo test -p sone-papdi-services battery
+cargo clippy -p sone-papdi-services -- -D warnings
 ```
 
 ## Notes / Risks

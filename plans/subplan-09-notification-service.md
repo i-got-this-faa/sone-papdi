@@ -8,7 +8,7 @@
 
 ## Scope
 
-- `crates/rs-shell-services/src/notifications.rs`.
+- `crates/sone-papdi-services/src/notifications.rs`.
 - `zbus` interface implementing `org.freedesktop.Notifications`.
 - Methods: `Notify`, `CloseNotification`, `GetCapabilities`, `GetServerInformation`.
 - Signals: `NotificationClosed`, `ActionInvoked`.
@@ -47,9 +47,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-services
-cargo test -p rs-shell-services notifications
-cargo clippy -p rs-shell-services -- -D warnings
+cargo build -p sone-papdi-services
+cargo test -p sone-papdi-services notifications
+cargo clippy -p sone-papdi-services -- -D warnings
 ```
 
 ## Notes / Risks

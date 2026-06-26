@@ -2,14 +2,14 @@
 
 **Goal:** Monitor NetworkManager connectivity, interfaces, and Wi-Fi access points, emitting `NetworkEvent` and `WirelessEvent` on the bus.
 
-**Target deliverable:** Plug/unplug ethernet, connect/disconnect Wi-Fi, or run a scan and see live events via `rs-shell subscribe network wireless`.
+**Target deliverable:** Plug/unplug ethernet, connect/disconnect Wi-Fi, or run a scan and see live events via `sone-papdi subscribe network wireless`.
 
 ---
 
 ## Scope
 
-- `crates/rs-shell-services/src/network.rs`.
-- `crates/rs-shell-services/src/wireless.rs`.
+- `crates/sone-papdi-services/src/network.rs`.
+- `crates/sone-papdi-services/src/wireless.rs`.
 - NetworkManager `StateChanged`, `DeviceAdded/Removed`, active connection tracking.
 - Wi-Fi device proxy: AP list, signal strength, security flags.
 - Wired interface enumeration.
@@ -47,9 +47,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-services --features networkmanager
-cargo test -p rs-shell-services network
-cargo clippy -p rs-shell-services -- -D warnings
+cargo build -p sone-papdi-services --features networkmanager
+cargo test -p sone-papdi-services network
+cargo clippy -p sone-papdi-services -- -D warnings
 ```
 
 ## Notes / Risks

@@ -8,7 +8,7 @@
 
 ## Scope
 
-- `crates/rs-shell-services/src/audio.rs`.
+- `crates/sone-papdi-services/src/audio.rs`.
 - PipeWire Rust bindings integration.
 - Tracking default sink/source via PipeWire metadata.
 - Volume/mute change detection.
@@ -46,10 +46,10 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-services --features pipewire
-cargo build -p rs-shell-services --features pulseaudio
-cargo test -p rs-shell-services audio
-cargo clippy -p rs-shell-services -- -D warnings
+cargo build -p sone-papdi-services --features pipewire
+cargo build -p sone-papdi-services --features pulseaudio
+cargo test -p sone-papdi-services audio
+cargo clippy -p sone-papdi-services -- -D warnings
 ```
 
 ## Notes / Risks

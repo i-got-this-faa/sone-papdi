@@ -15,7 +15,7 @@ Build **sone-papdi**: a complete Wayland desktop shell (panel, launcher, notific
 | 01 | [Core IPC & Event Bus](./subplan-01-core.md) | `ShellEvent` types, `EventBus`, length-prefixed JSON IPC, socket paths | 00 | 🚧 Not started |
 | 02 | [Configuration Engine](./subplan-02-config.md) | TOML schema, default config, hot-reload watcher | 00 | 🚧 Not started |
 | 03 | [Clipboard Engine](./subplan-03-clipboard.md) | Clipboard daemon, SQLite history, `ShellEvent::Clipboard` | 01, 02 | 🚧 Not started |
-| 04 | [Subscribable API](./subplan-04-api.md) | Unix socket server + D-Bus `org.rs_shell.Shell1` + CLI `rs-shell` | 01, 02 | 🚧 Not started |
+| 04 | [Subscribable API](./subplan-04-api.md) | Unix socket server + D-Bus `org.rs_shell.Shell1` + CLI `sone-papdi` | 01, 02 | 🚧 Not started |
 | 05 | [WM Bridge](./subplan-05-wm-bridge.md) | `WmAdapter` trait, wlr-foreign-toplevel, Hyprland/sway/niri adapters | 01 | 🚧 Not started |
 | 06 | [Battery Service](./subplan-06-battery-service.md) | UPower D-Bus battery state + thresholds | 01, 02 | 🚧 Not started |
 | 07 | [Network & Wireless Service](./subplan-07-network-wireless-service.md) | NetworkManager connectivity, interfaces, Wi-Fi scan/connect | 01, 02 | 🚧 Not started |
@@ -23,7 +23,7 @@ Build **sone-papdi**: a complete Wayland desktop shell (panel, launcher, notific
 | 09 | [Notification Service](./subplan-09-notification-service.md) | `org.freedesktop.Notifications` server | 01 | 🚧 Not started |
 | 10 | [Wallpaper & Theme Service](./subplan-10-wallpaper-theme-service.md) | Wallpaper backends, theme CSS resolution, gsettings | 01, 02 | 🚧 Not started |
 | 11 | [UI Components](./subplan-11-ui-components.md) | Shared GTK4 layer-shell helpers, CSS loader, widgets | 00 | 🚧 Not started |
-| 12 | [Bar / Panel](./subplan-12-bar.md) | `rs-shell-bar` binary with modules | 01, 02, 05, 06, 07, 08, 11 | 🚧 Not started |
+| 12 | [Bar / Panel](./subplan-12-bar.md) | `sone-papdi-bar` binary with modules | 01, 02, 05, 06, 07, 08, 11 | 🚧 Not started |
 | 13 | [Launcher](./subplan-13-launcher.md) | App launcher with .desktop indexing & fuzzy search | 01, 02, 11 | 🚧 Not started |
 | 14 | [Notification OSD](./subplan-14-notification-osd.md) | On-screen notifications + history drawer | 01, 09, 11 | 🚧 Not started |
 | 15 | [Quick Settings Panel](./subplan-15-quick-settings.md) | Volume, brightness, network, theme toggles | 01, 02, 06, 07, 08, 11 | 🚧 Not started |
@@ -79,7 +79,7 @@ Build **sone-papdi**: a complete Wayland desktop shell (panel, launcher, notific
 
 | Phase | Subplans | Milestone |
 |---|---|---|
-| 0 — Scaffold | 00, 01, 02 | `rs-shelld` boots, socket accepts connections, `rs-shell subscribe '*'` streams nothing |
+| 0 — Scaffold | 00, 01, 02 | `rs-shelld` boots, socket accepts connections, `sone-papdi subscribe '*'` streams nothing |
 | 1 — Clipboard | 03 | Clipboard works via shared bus |
 | 2 — Services | 06, 07, 08, 09, 10 | Live battery/audio/network/notification/wallpaper events |
 | 3 — WM Bridge | 05 | Window lifecycle events on the bus |

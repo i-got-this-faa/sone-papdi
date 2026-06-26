@@ -1,14 +1,14 @@
 # Subplan 12 — Bar / Panel
 
-**Goal:** Implement the `rs-shell-bar` binary: a GTK4 layer-shell panel with left/center/right modules reacting to live events.
+**Goal:** Implement the `sone-papdi-bar` binary: a GTK4 layer-shell panel with left/center/right modules reacting to live events.
 
-**Target deliverable:** Running `rs-shell-bar` shows a top/bottom bar with clock, battery, audio, network, workspaces, and notification bell.
+**Target deliverable:** Running `sone-papdi-bar` shows a top/bottom bar with clock, battery, audio, network, workspaces, and notification bell.
 
 ---
 
 ## Scope
 
-- `crates/rs-shell-bar/src/main.rs`.
+- `crates/sone-papdi-bar/src/main.rs`.
 - Module widgets: workspaces, window title, clock, systray stub, audio, network, battery, notifications.
 - Bar layout via `gtk4::CenterBox`.
 - IPC client to `rs-shelld` for events.
@@ -27,7 +27,7 @@
 
 ## Acceptance Criteria
 
-- [ ] `rs-shell-bar` binary compiles and starts.
+- [ ] `sone-papdi-bar` binary compiles and starts.
 - [ ] Creates a layer-shell surface anchored as configured.
 - [ ] Renders left/center/right modules.
 - [ ] Clock widget updates every second.
@@ -57,9 +57,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-bar
-cargo test -p rs-shell-bar
-cargo run -p rs-shell-bar -- --help
+cargo build -p sone-papdi-bar
+cargo test -p sone-papdi-bar
+cargo run -p sone-papdi-bar -- --help
 ```
 
 ## Notes / Risks

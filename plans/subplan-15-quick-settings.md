@@ -8,7 +8,7 @@
 
 ## Scope
 
-- `crates/rs-shell-ui/src/quick_settings.rs`.
+- `crates/sone-papdi-ui/src/quick_settings.rs`.
 - Volume slider controlling default sink.
 - Brightness slider (via `brightnessctl` or `ddcutil` stub).
 - Network/Wi-Fi list and connect toggle.
@@ -56,9 +56,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-ui
-cargo test -p rs-shell-ui quick_settings
-cargo clippy -p rs-shell-ui -- -D warnings
+cargo build -p sone-papdi-ui
+cargo test -p sone-papdi-ui quick_settings
+cargo clippy -p sone-papdi-ui -- -D warnings
 ```
 
 ## Notes / Risks

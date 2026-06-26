@@ -2,15 +2,15 @@
 
 **Goal:** Build shared GTK4 layer-shell helpers, CSS loading, and reusable widgets used by the bar, launcher, OSD, and quick settings.
 
-**Target deliverable:** A standalone `rs-shell-ui` library compiles; `apply_css_to_screen` loads CSS; shared widgets render without crashing.
+**Target deliverable:** A standalone `sone-papdi-ui` library compiles; `apply_css_to_screen` loads CSS; shared widgets render without crashing.
 
 ---
 
 ## Scope
 
-- `crates/rs-shell-ui/src/lib.rs`.
-- `crates/rs-shell-ui/src/theme.rs` — CSS provider loading/hot-reload.
-- `crates/rs-shell-ui/src/layer_window.rs` — helper to create anchored layer-shell windows.
+- `crates/sone-papdi-ui/src/lib.rs`.
+- `crates/sone-papdi-ui/src/theme.rs` — CSS provider loading/hot-reload.
+- `crates/sone-papdi-ui/src/layer_window.rs` — helper to create anchored layer-shell windows.
 - Shared widgets: `BarModule`, `IconLabel`, `Meter`, etc. (stubs acceptable).
 - Integration with `tokio` broadcast receiver → GTK updates via `glib::spawn_future_local`.
 
@@ -22,7 +22,7 @@
 
 ## Acceptance Criteria
 
-- [ ] `rs-shell-ui` crate compiles with GTK4 and `gtk4-layer-shell`.
+- [ ] `sone-papdi-ui` crate compiles with GTK4 and `gtk4-layer-shell`.
 - [ ] `apply_css_to_screen` loads CSS onto the default display.
 - [ ] `watch_and_reload_theme` reacts to config watch changes.
 - [ ] Layer-shell window helper supports layer, anchors, margins, exclusive zone.
@@ -45,9 +45,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-ui
-cargo test -p rs-shell-ui
-cargo clippy -p rs-shell-ui -- -D warnings
+cargo build -p sone-papdi-ui
+cargo test -p sone-papdi-ui
+cargo clippy -p sone-papdi-ui -- -D warnings
 ```
 
 ## Notes / Risks

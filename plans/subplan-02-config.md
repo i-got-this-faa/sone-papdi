@@ -2,13 +2,13 @@
 
 **Goal:** Provide a single TOML configuration source that can be parsed, defaulted, and hot-reloaded at runtime.
 
-**Target deliverable:** `ConfigManager::new()` loads `~/.config/rs-shell/config.toml` (or writes a default), returns a `watch::Receiver<ShellConfig>`, and file changes emit updated configs after a 150ms debounce.
+**Target deliverable:** `ConfigManager::new()` loads `~/.config/sone-papdi/config.toml` (or writes a default), returns a `watch::Receiver<ShellConfig>`, and file changes emit updated configs after a 150ms debounce.
 
 ---
 
 ## Scope
 
-- `crates/rs-shell-config/src/lib.rs` and supporting modules.
+- `crates/sone-papdi-config/src/lib.rs` and supporting modules.
 - `ShellConfig` struct mirroring the schema in `implementation-plan.md` Section 5.1.
 - `ConfigManager` with `notify` file watcher, `tokio::sync::watch`, and `Arc<RwLock<ShellConfig>>`.
 - `assets/default-config.toml` bundled via `include_str!`.
@@ -43,7 +43,7 @@
 - [ ] Define `KeybindsConfig`.
 - [ ] Assemble `ShellConfig` with serde derive.
 - [ ] Implement `Default` via bundled `default-config.toml`.
-- [ ] Implement `config_path()` resolving `~/.config/rs-shell/config.toml`.
+- [ ] Implement `config_path()` resolving `~/.config/sone-papdi/config.toml`.
 - [ ] Implement `load_config` with missing-key merge against defaults.
 - [ ] Implement `ConfigManager::new()`.
 - [ ] Implement `ConfigManager::watch()` with debounce.
@@ -55,8 +55,8 @@
 ## Verification
 
 ```bash
-cargo test -p rs-shell-config
-cargo clippy -p rs-shell-config -- -D warnings
+cargo test -p sone-papdi-config
+cargo clippy -p sone-papdi-config -- -D warnings
 ```
 
 ## Notes / Risks

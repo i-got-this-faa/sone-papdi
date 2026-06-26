@@ -2,14 +2,14 @@
 
 **Goal:** Port/adapt the rsclip clipboard daemon so it stores history in SQLite, watches `wl-paste`, and emits typed `ShellEvent::Clipboard` events into the shared bus.
 
-**Target deliverable:** `rs-shell-clipd` runs standalone, stores clipboard entries, and clients can list/search/delete entries via the IPC command set.
+**Target deliverable:** `sone-papdi-clipd` runs standalone, stores clipboard entries, and clients can list/search/delete entries via the IPC command set.
 
 ---
 
 ## Scope
 
-- `crates/rs-shell-clipboard/src/lib.rs` and supporting modules.
-- `crates/rs-shell-clipboard/src/main.rs` for the `rs-shell-clipd` binary.
+- `crates/sone-papdi-clipboard/src/lib.rs` and supporting modules.
+- `crates/sone-papdi-clipboard/src/main.rs` for the `sone-papdi-clipd` binary.
 - SQLite schema matching rsclip (text/link/color/image/file/secret).
 - `wl-paste --watch` integration.
 - Deduplication, pinning, cleanup, and size limits.
@@ -23,8 +23,8 @@
 
 ## Acceptance Criteria
 
-- [ ] `rs-shell-clipd` binary compiles and starts.
-- [ ] SQLite database is created at `~/.local/share/rs-shell/clipboard.db`.
+- [ ] `sone-papdi-clipd` binary compiles and starts.
+- [ ] SQLite database is created at `~/.local/share/sone-papdi/clipboard.db`.
 - [ ] Copying new clipboard content inserts a row and emits `ClipboardEvent::Stored`.
 - [ ] Deduplication works as configured.
 - [ ] `ShellCommand::ClipboardList` returns entries.
@@ -46,15 +46,15 @@
 - [ ] Spawn `wtype`/`ydotool`/`xdotool` paste automation when requested.
 - [ ] Implement command dispatch for `ClipboardList`, `ClipboardCopy`, `ClipboardDelete`, `ClipboardSearch`.
 - [ ] Emit `ClipboardEvent::Stored`, `Copied`, `Deleted`, `Cleared`, `PinnedToggled`, `SearchResult`.
-- [ ] Add `rs-shell-clipd` binary entry point.
+- [ ] Add `sone-papdi-clipd` binary entry point.
 - [ ] Write unit tests for DB layer using in-memory SQLite.
 
 ## Verification
 
 ```bash
-cargo build -p rs-shell-clipboard
-cargo test -p rs-shell-clipboard
-cargo clippy -p rs-shell-clipboard -- -D warnings
+cargo build -p sone-papdi-clipboard
+cargo test -p sone-papdi-clipboard
+cargo clippy -p sone-papdi-clipboard -- -D warnings
 ```
 
 ## Notes / Risks

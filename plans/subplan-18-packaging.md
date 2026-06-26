@@ -25,7 +25,7 @@
 
 - [ ] `cargo xtask install` installs binaries to `~/.cargo/bin`.
 - [ ] Systemd user units are installed and reference the correct binaries.
-- [ ] Default config is installed to `/usr/share/rs-shell/default-config.toml`.
+- [ ] Default config is installed to `/usr/share/sone-papdi/default-config.toml`.
 - [ ] AUR PKGBUILD produces a valid package.
 - [ ] Debian package builds with `dpkg-buildpackage`.
 - [ ] `cargo xtask package` creates a release archive.
@@ -39,8 +39,8 @@
 - [ ] Implement `cargo xtask test-e2e`.
 - [ ] Implement `cargo xtask clean-all`.
 - [ ] Create `packaging/systemd/rs-shelld.service`.
-- [ ] Create `packaging/systemd/rs-shell-bar.service`.
-- [ ] Create `packaging/systemd/rs-shell-clipboard.service`.
+- [ ] Create `packaging/systemd/sone-papdi-bar.service`.
+- [ ] Create `packaging/systemd/sone-papdi-clipboard.service`.
 - [ ] Create `packaging/aur/PKGBUILD`.
 - [ ] Create `packaging/deb/control`.
 - [ ] Create `packaging/deb/rules`.

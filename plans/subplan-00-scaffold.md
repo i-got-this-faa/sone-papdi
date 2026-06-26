@@ -32,15 +32,15 @@ None.
 ## Task Checklist
 
 - [x] Create `Cargo.toml` workspace with members and shared dependencies.
-- [x] Create `crates/rs-shell-core/Cargo.toml` + `src/lib.rs`.
-- [x] Create `crates/rs-shell-config/Cargo.toml` + `src/lib.rs`.
-- [x] Create `crates/rs-shell-clipboard/Cargo.toml` + `src/lib.rs`.
-- [x] Create `crates/rs-shell-api/Cargo.toml` + `src/lib.rs`.
-- [x] Create `crates/rs-shell-wm/Cargo.toml` + `src/lib.rs`.
-- [x] Create `crates/rs-shell-services/Cargo.toml` + `src/lib.rs`.
-- [x] Create `crates/rs-shell-ui/Cargo.toml` + `src/lib.rs`.
-- [x] Create `crates/rs-shell-daemon/Cargo.toml` + `src/main.rs`.
-- [x] Create `crates/rs-shell-bar/Cargo.toml` + `src/main.rs`.
+- [x] Create `crates/sone-papdi-core/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/sone-papdi-config/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/sone-papdi-clipboard/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/sone-papdi-api/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/sone-papdi-wm/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/sone-papdi-services/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/sone-papdi-ui/Cargo.toml` + `src/lib.rs`.
+- [x] Create `crates/sone-papdi-daemon/Cargo.toml` + `src/main.rs`.
+- [x] Create `crates/sone-papdi-bar/Cargo.toml` + `src/main.rs`.
 - [x] Create `xtask/Cargo.toml` + `src/main.rs`.
 - [x] Create `assets/themes/`, `assets/icons/`, `assets/default-config.toml`.
 - [x] Create `packaging/systemd/`, `packaging/aur/`, `packaging/deb/`.

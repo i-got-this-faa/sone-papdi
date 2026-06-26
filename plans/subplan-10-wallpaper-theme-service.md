@@ -8,8 +8,8 @@
 
 ## Scope
 
-- `crates/rs-shell-services/src/wallpaper.rs`.
-- `crates/rs-shell-services/src/theme.rs`.
+- `crates/sone-papdi-services/src/wallpaper.rs`.
+- `crates/sone-papdi-services/src/theme.rs`.
 - Backends: `swww`, `swaybg`, `hyprpaper`, and an `internal` placeholder.
 - Theme CSS resolution: user dir → bundled dir → color overrides.
 - gsettings integration for GTK/icon themes.
@@ -29,7 +29,7 @@
 - [ ] Emits `WallpaperEvent::Changed` on success.
 - [ ] `theme::ThemeManager::apply` resolves CSS from bundled or user themes.
 - [ ] Applies GTK theme and icon theme via gsettings.
-- [ ] Writes active CSS to `~/.config/rs-shell/active-theme.css`.
+- [ ] Writes active CSS to `~/.config/sone-papdi/active-theme.css`.
 - [ ] Emits `ThemeEvent::Changed` and `ColorsUpdated`.
 - [ ] Unit tests for CSS variable extraction and theme resolution.
 
@@ -50,10 +50,10 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-services
-cargo test -p rs-shell-services wallpaper
-cargo test -p rs-shell-services theme
-cargo clippy -p rs-shell-services -- -D warnings
+cargo build -p sone-papdi-services
+cargo test -p sone-papdi-services wallpaper
+cargo test -p sone-papdi-services theme
+cargo clippy -p sone-papdi-services -- -D warnings
 ```
 
 ## Notes / Risks

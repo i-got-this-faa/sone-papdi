@@ -8,7 +8,7 @@
 
 ## Scope
 
-- `crates/rs-shell-ui/src/notifications.rs`.
+- `crates/sone-papdi-ui/src/notifications.rs`.
 - OSD popup stack (top-right default).
 - Per-notification widget: icon, app name, summary, body, actions, dismiss.
 - Timeout progress bar and urgency styling.
@@ -51,9 +51,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-ui
-cargo test -p rs-shell-ui notifications
-cargo clippy -p rs-shell-ui -- -D warnings
+cargo build -p sone-papdi-ui
+cargo test -p sone-papdi-ui notifications
+cargo clippy -p sone-papdi-ui -- -D warnings
 ```
 
 ## Notes / Risks

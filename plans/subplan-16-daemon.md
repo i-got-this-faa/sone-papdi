@@ -8,14 +8,14 @@
 
 ## Scope
 
-- `crates/rs-shell-daemon/src/main.rs`.
+- `crates/sone-papdi-daemon/src/main.rs`.
 - `rs-shelld` binary.
 - Initializes tracing, config manager, event bus.
 - Spawns WM adapter and bridges `WindowEvent` → `ShellEvent::Window`.
 - Spawns services: battery, network, audio, wireless, notifications, clipboard, wallpaper/theme apply.
 - Hosts Unix socket and D-Bus API servers.
 - Publishes lifecycle events and monitors service tasks.
-- CLI `rs-shell` binary entry point.
+- CLI `sone-papdi` binary entry point.
 
 ## Dependencies
 
@@ -70,9 +70,9 @@
 ## Verification
 
 ```bash
-cargo build -p rs-shell-daemon
-cargo test -p rs-shell-daemon
-cargo run -p rs-shell-daemon -- --help
+cargo build -p sone-papdi-daemon
+cargo test -p sone-papdi-daemon
+cargo run -p sone-papdi-daemon -- --help
 ```
 
 ## Notes / Risks
